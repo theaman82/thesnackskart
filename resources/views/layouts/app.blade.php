@@ -11,7 +11,10 @@
         @livewireStyles
     </head>
     <body>
-        {{ $slot }}
+        <div>
+            <x-navbar/>
+        </div>
+         @yield('content')
 
         @livewireScripts
     </body>
