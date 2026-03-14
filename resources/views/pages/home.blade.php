@@ -10,7 +10,7 @@
         <div class="absolute inset-0 opacity-[0.05] bg-[linear-gradient(to_right,#16a34a_1px,transparent_1px),linear-gradient(to_bottom,#16a34a_1px,transparent_1px)] bg-[size:60px_60px]"></div>
     </div>
 
-    <div class="relative max-w-7xl mx-auto px-5 md:px-8 lg:px-12 pt-16 pb-20 md:pt-20 md:pb-24">
+    <div class="relative max-w-7xl mx-auto px-5 md:px-8 lg:px-4 pt-16 pb-20 md:pt-20 md:pb-24">
         <div class="grid lg:grid-cols-2 gap-14 xl:gap-20 items-center">
 
             <!-- Left Content -->
