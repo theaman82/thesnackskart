@@ -1,78 +1,122 @@
 @extends('layouts.app')
 
 @section('content')
-    <!-- Hero Section -->
-<section class="relative min-h-[90vh]  flex items-center bg-gradient-to-br from-green-50 via-emerald-50 to-amber-50/60 overflow-hidden px-5 md:px-8 lg:px-12 py-16 md:py-10">
-  <!-- Subtle background pattern / overlay -->
-  <div class="absolute inset-0 opacity-10 pointer-events-none">
-    <div class="absolute inset-0 bg-[radial-gradient(circle_at_30%_70%,rgba(34,197,94,0.12)_0%,transparent_50%)]"></div>
-    <div class="absolute inset-0 bg-[radial-gradient(circle_at_70%_30%,rgba(245,158,11,0.08)_0%,transparent_50%)]"></div>
-  </div>
-
-  <div class="relative max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center z-10">
-    <!-- Left - Text Content -->
-    <div class="space-y-8 md:space-y-10 text-center lg:text-left">
-      <div class="space-y-5 animate-fade-up">
-        <span class="inline-block px-5 py-2 bg-green-100 text-green-700 font-semibold rounded-full text-sm tracking-wide uppercase animate-pulse-slow">
-          100% Certified Organic
-        </span>
-        
-        <h1 class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 leading-tight">
-          Pure Farm Fresh<span class="text-green-600">.</span><br>
-          Straight to Your <span class="text-amber-600">Table</span>
-        </h1>
-      </div>
-
-      <p class="text-lg sm:text-xl text-gray-700 max-w-xl mx-auto lg:mx-0 leading-relaxed animate-fade-up animation-delay-200">
-        From small family farms to your kitchen — untouched, unprocessed, truly organic goodness that nourishes you and the planet.
-      </p>
-
-      <div class="flex flex-wrap gap-5 justify-center lg:justify-start pt-4 animate-fade-up animation-delay-300">
-        <a href="/shop" 
-           class="group relative px-9 py-4 bg-green-600 hover:bg-green-700 text-white font-semibold text-lg rounded-xl overflow-hidden shadow-lg shadow-green-200/40 transition-all duration-300 hover:shadow-xl hover:shadow-green-300/50 hover:-translate-y-1">
-          <span class="relative z-10">Shop Fresh Now</span>
-          <div class="absolute inset-0 bg-gradient-to-r from-green-500 to-emerald-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-        </a>
-
-        <a href="#featured" 
-           class="px-9 py-4 border-2 border-green-600 text-green-700 font-semibold text-lg rounded-xl hover:bg-green-50 hover:text-green-800 transition-all duration-300 hover:-translate-y-1">
-          Discover Products
-        </a>
-      </div>
-
-      <!-- Trust signals -->
-      <div class="flex flex-wrap gap-6 justify-center lg:justify-start pt-6 text-sm text-gray-600 animate-fade-up animation-delay-400">
-        <div class="flex items-center gap-2">
-          <span class="text-green-600 text-xl">✓</span> Chemical-free
-        </div>
-        <div class="flex items-center gap-2">
-          <span class="text-green-600 text-xl">✓</span> Farmer direct
-        </div>
-        <div class="flex items-center gap-2">
-          <span class="text-green-600 text-xl">✓</span> Delivered fresh
-        </div>
-      </div>
+<!-- Hero Section -->
+<section class="relative overflow-hidden bg-gradient-to-br from-[#f7fbf6] via-[#fdfdf8] to-[#fff8ee]">
+    <!-- Background decorative layers -->
+    <div class="absolute inset-0 pointer-events-none">
+        <div class="absolute -top-24 left-0 h-72 w-72 rounded-full bg-green-200/30 blur-3xl"></div>
+        <div class="absolute top-1/3 right-0 h-80 w-80 rounded-full bg-amber-200/30 blur-3xl"></div>
+        <div class="absolute inset-0 opacity-[0.05] bg-[linear-gradient(to_right,#16a34a_1px,transparent_1px),linear-gradient(to_bottom,#16a34a_1px,transparent_1px)] bg-[size:60px_60px]"></div>
     </div>
 
-    <!-- Right - Image / Visual -->
-    <div class="relative animate-fade-in animation-delay-300 lg:order-last">
-      <div class="relative rounded-2xl overflow-hidden shadow-2xl shadow-green-900/15 transform hover:scale-[1.02] transition-transform duration-500">
-        <img 
-          src="{{ asset('/banner/anya_blog_banner-1.jpg') }}" 
-          alt="Fresh organic vegetables and fruits" 
-          class="w-full h-[380px] sm:h-[460px] lg:h-[520px] object-cover"
-        >
-        <!-- Overlay badge -->
-        <div class="absolute bottom-6 left-6 bg-white/90 backdrop-blur-sm px-6 py-3 rounded-xl shadow-lg">
-          <p class="text-green-700 font-bold text-lg">Farm Fresh Daily</p>
-        </div>
-      </div>
+    <div class="relative max-w-7xl mx-auto px-5 md:px-8 lg:px-12 pt-16 pb-20 md:pt-20 md:pb-24">
+        <div class="grid lg:grid-cols-2 gap-14 xl:gap-20 items-center">
 
-      <!-- Floating subtle elements -->
-      <div class="absolute -top-8 -right-8 w-32 h-32 bg-green-400/20 rounded-full blur-3xl animate-pulse-slow"></div>
-      <div class="absolute -bottom-12 -left-12 w-40 h-40 bg-amber-300/20 rounded-full blur-3xl animate-pulse-slow delay-1000"></div>
+            <!-- Left Content -->
+            <div class="text-center lg:text-left">
+                <!-- Top label -->
+                <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-green-200 bg-white/80 backdrop-blur-sm shadow-sm mb-6">
+                    <span class="h-2.5 w-2.5 rounded-full bg-green-500 animate-pulse"></span>
+                    <span class="text-sm font-semibold tracking-wide text-green-700 uppercase">
+                        100% Certified Organic
+                    </span>
+                </div>
+
+                <!-- Heading -->
+                <h1 class="text-4xl sm:text-5xl md:text-6xl xl:text-7xl font-bold tracking-tight text-gray-900 leading-[1.05]">
+                    Fresh from the
+                    <span class="block text-green-700">Farm to Your Home</span>
+                </h1>
+
+                <!-- Subheading -->
+                <p class="mt-6 max-w-2xl mx-auto lg:mx-0 text-lg md:text-xl leading-relaxed text-gray-600">
+                    Discover naturally grown fruits, vegetables, and essentials sourced directly from trusted local farmers — fresh, chemical-free, and delivered with care.
+                </p>
+
+                <!-- CTA -->
+                <div class="mt-8 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
+                    <a href="/shop"
+                        class="group inline-flex items-center justify-center gap-2 px-7 py-4 rounded-xl bg-green-600 text-white font-semibold shadow-lg shadow-green-200 transition-all duration-300 hover:bg-green-700 hover:-translate-y-0.5">
+                        Shop Fresh Now
+                        <svg class="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                        </svg>
+                    </a>
+
+                    <a href="#featured"
+                        class="inline-flex items-center justify-center px-7 py-4 rounded-xl border border-gray-300 bg-white/80 text-gray-800 font-semibold hover:border-green-600 hover:text-green-700 hover:bg-green-50 transition-all duration-300">
+                        Explore Products
+                    </a>
+                </div>
+
+                <!-- Mini stats / trust -->
+                <div class="mt-10 grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-2xl mx-auto lg:mx-0">
+                    <div class="rounded-2xl bg-white/80 backdrop-blur-sm border border-green-100 shadow-sm px-5 py-4">
+                        <p class="text-2xl font-bold text-gray-900">500+</p>
+                        <p class="text-sm text-gray-600 mt-1">Organic products</p>
+                    </div>
+                    <div class="rounded-2xl bg-white/80 backdrop-blur-sm border border-green-100 shadow-sm px-5 py-4">
+                        <p class="text-2xl font-bold text-gray-900">50+</p>
+                        <p class="text-sm text-gray-600 mt-1">Local farm partners</p>
+                    </div>
+                    <div class="rounded-2xl bg-white/80 backdrop-blur-sm border border-green-100 shadow-sm px-5 py-4">
+                        <p class="text-2xl font-bold text-gray-900">Same Day</p>
+                        <p class="text-sm text-gray-600 mt-1">Fresh delivery</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Visual -->
+            <div class="relative">
+                <!-- Main image card -->
+                <div class="relative rounded-[28px] overflow-hidden shadow-[0_25px_80px_-20px_rgba(22,163,74,0.25)] border border-white/60 bg-white">
+                    <img
+                        src="{{ asset('/banner/anya_blog_banner-1.jpg') }}"
+                        alt="Fresh organic vegetables and fruits"
+                        class="w-full h-[420px] sm:h-[500px] lg:h-[580px] object-cover"
+                    >
+
+                    <!-- Dark soft gradient -->
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/30 via-black/5 to-transparent"></div>
+
+                    <!-- Bottom info card -->
+                    <div class="absolute bottom-5 left-5 right-5">
+                        <div class="flex items-center justify-between gap-4 rounded-2xl bg-white/85 backdrop-blur-md border border-white/70 shadow-xl px-5 py-4">
+                            <div>
+                                <p class="text-sm font-medium text-gray-500">Today’s Fresh Pick</p>
+                                <p class="text-lg md:text-xl font-bold text-gray-900">Seasonal Organic Harvest</p>
+                            </div>
+                            <div class="hidden sm:flex h-12 w-12 items-center justify-center rounded-full bg-green-100 text-green-700">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 21c4.97-4.97 8-8.582 8-12a8 8 0 10-16 0c0 3.418 3.03 7.03 8 12z"></path>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Floating top card -->
+                <div class="hidden md:flex absolute -top-6 -left-10 bg-white rounded-2xl shadow-xl border border-green-100 px-5 py-4 items-center gap-3">
+                    <div class="flex h-12 w-12 items-center justify-center rounded-full bg-green-100 text-green-700">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-6h13v6M9 17H5a2 2 0 01-2-2V7a2 2 0 012-2h4m0 12V5m0 0l-3 3m3-3l3 3"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">Direct from</p>
+                        <p class="font-semibold text-gray-900">Trusted Farmers</p>
+                    </div>
+                </div>
+
+                <!-- Floating bottom-right badge -->
+                <div class="hidden md:block absolute -bottom-6 -right-6 rounded-2xl bg-green-600 text-white shadow-xl px-6 py-4">
+                    <p class="text-sm uppercase tracking-wide text-green-100">Freshness</p>
+                    <p class="text-2xl font-bold">100%</p>
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
 </section>
 
     <!-- Categories Section -->
