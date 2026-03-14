@@ -1,69 +1,128 @@
 <!-- Navbar / Header -->
-<nav class="fixed top-0 left-0 right-0 z-50 bg-amber-50/95 backdrop-blur-md shadow-sm border-b border-amber-100/60 transition-all duration-300">
+<nav id="site-navbar"
+  class="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl border-b border-amber-100/60 shadow-[0_8px_30px_rgba(0,0,0,0.04)] transition-all duration-300">
+  
   <div class="max-w-7xl mx-auto px-5 sm:px-8 lg:px-10">
-    <div class="flex items-center justify-between h-16 md:h-18">
+    <div class="flex items-center justify-between h-[72px]">
 
       <!-- Logo -->
       <div class="flex-shrink-0">
-        <a href="/" class="flex items-center gap-1.5 text-3xl md:text-3.5xl font-extrabold tracking-tight text-amber-700 hover:text-amber-600 transition-colors duration-300">
-          TheSnacksKart
-          <span class="text-amber-500 text-2xl font-bold">.</span>
+        <a href="/"
+          class="group inline-flex items-center gap-2 text-2xl md:text-3xl font-extrabold tracking-tight text-amber-700 transition-all duration-300 hover:scale-[1.01]">
+          <span class="relative">
+            TheSnacksKart
+          </span>
+          <span class="text-amber-500 text-3xl leading-none group-hover:translate-x-0.5 transition-transform duration-300">.</span>
         </a>
       </div>
 
       <!-- Desktop Menu -->
-      <div class="hidden md:flex items-center gap-10">
-        <a href="/shop" class="relative font-medium text-gray-700 hover:text-amber-700 text-base transition-colors duration-300 group">
+      <div class="hidden md:flex items-center gap-8 lg:gap-10">
+        <a href="/shop"
+          class="relative font-medium text-gray-700 hover:text-amber-700 text-[15px] lg:text-base transition-colors duration-300 group">
           Shop
-          <span class="absolute left-0 bottom-[-6px] w-0 h-0.5 bg-amber-600 rounded-full transition-all duration-300 ease-out group-hover:w-full"></span>
+          <span
+            class="absolute left-0 -bottom-2 h-0.5 w-0 bg-amber-600 rounded-full transition-all duration-300 group-hover:w-full"></span>
         </a>
-        <a href="/about" class="relative font-medium text-gray-700 hover:text-amber-700 text-base transition-colors duration-300 group">
+
+        <a href="/about"
+          class="relative font-medium text-gray-700 hover:text-amber-700 text-[15px] lg:text-base transition-colors duration-300 group">
           About Us
-          <span class="absolute left-0 bottom-[-6px] w-0 h-0.5 bg-amber-600 rounded-full transition-all duration-300 ease-out group-hover:w-full"></span>
+          <span
+            class="absolute left-0 -bottom-2 h-0.5 w-0 bg-amber-600 rounded-full transition-all duration-300 group-hover:w-full"></span>
         </a>
-        <a href="/contact" class="relative font-medium text-gray-700 hover:text-amber-700 text-base transition-colors duration-300 group">
+
+        <a href="/contact"
+          class="relative font-medium text-gray-700 hover:text-amber-700 text-[15px] lg:text-base transition-colors duration-300 group">
           Contact
-          <span class="absolute left-0 bottom-[-6px] w-0 h-0.5 bg-amber-600 rounded-full transition-all duration-300 ease-out group-hover:w-full"></span>
+          <span
+            class="absolute left-0 -bottom-2 h-0.5 w-0 bg-amber-600 rounded-full transition-all duration-300 group-hover:w-full"></span>
         </a>
       </div>
 
-      <!-- Actions (Cart + Login) -->
-      <div class="hidden md:flex items-center gap-6">
-        <a href="/cart" class="text-gray-700 hover:text-amber-700 transition-colors duration-300 text-2xl relative group">
-          🛒
-          <!-- Optional cart count badge -->
-          <!-- <span class="absolute -top-1 -right-1 bg-amber-600 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">3</span> -->
+      <!-- Desktop Actions -->
+      <div class="hidden md:flex items-center gap-3 lg:gap-4">
+        <!-- Cart -->
+        <a href="/cart"
+          class="relative inline-flex items-center justify-center w-11 h-11 rounded-xl border border-amber-100 bg-white text-gray-700 hover:text-amber-700 hover:border-amber-200 hover:bg-amber-50/80 shadow-sm transition-all duration-300">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none"
+            viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-1 5h12M10 21a1 1 0 100-2 1 1 0 000 2zm8 0a1 1 0 100-2 1 1 0 000 2z" />
+          </svg>
+
+          <!-- Badge -->
+          <span
+            class="absolute -top-1.5 -right-1.5 min-w-[20px] h-5 px-1 rounded-full bg-amber-600 text-white text-[11px] font-bold flex items-center justify-center shadow">
+            2
+          </span>
         </a>
 
-        <a href="/login" class="px-7 py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-semibold text-base rounded-xl shadow-md shadow-amber-200/40 transition-all duration-300 hover:shadow-lg hover:shadow-amber-300/50 hover:-translate-y-0.5">
+        <!-- Login Button -->
+        <a href="/login"
+          class="inline-flex items-center justify-center px-6 lg:px-7 py-2.5 rounded-xl bg-amber-600 text-white font-semibold text-sm lg:text-base shadow-lg shadow-amber-200/50 hover:bg-amber-700 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-amber-300/50 transition-all duration-300">
           Login
         </a>
       </div>
 
-      <!-- Mobile Hamburger Button -->
+      <!-- Mobile Toggle -->
       <div class="md:hidden">
-        <button id="mobile-menu-btn" class="text-gray-700 hover:text-amber-700 focus:outline-none transition-colors" aria-label="Toggle menu">
-          <svg id="menu-open" class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+        <button id="mobile-menu-btn"
+          class="inline-flex items-center justify-center w-11 h-11 rounded-xl border border-amber-100 bg-white text-gray-700 hover:text-amber-700 hover:bg-amber-50 transition-all duration-300 focus:outline-none"
+          aria-label="Toggle menu">
+          <svg id="menu-open" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M4 6h16M4 12h16M4 18h16"></path>
           </svg>
-          <svg id="menu-close" class="w-8 h-8 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          <svg id="menu-close" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M6 18L18 6M6 6l12 12"></path>
           </svg>
         </button>
       </div>
+
     </div>
   </div>
 
-  <!-- Mobile Menu (Slide down) -->
-  <div id="mobile-menu" class="hidden md:hidden bg-amber-50 border-b border-amber-100/60 shadow-lg">
-    <div class="px-5 pt-3 pb-6 space-y-5">
-      <a href="/shop" class="block font-medium text-gray-800 hover:text-amber-700 text-lg py-2 transition-colors">Shop</a>
-      <a href="/about" class="block font-medium text-gray-800 hover:text-amber-700 text-lg py-2 transition-colors">About Us</a>
-      <a href="/contact" class="block font-medium text-gray-800 hover:text-amber-700 text-lg py-2 transition-colors">Contact</a>
+  <!-- Mobile Menu -->
+  <div id="mobile-menu"
+    class="max-h-0 overflow-hidden opacity-0 transition-all duration-300 md:hidden bg-white/95 backdrop-blur-xl border-t border-amber-100/70">
+    <div class="px-5 pt-4 pb-6 space-y-2">
+      
+      <a href="/shop"
+        class="flex items-center justify-between rounded-xl px-4 py-3 text-gray-800 font-medium hover:bg-amber-50 hover:text-amber-700 transition-all duration-300">
+        <span>Shop</span>
+        <span class="text-amber-500">→</span>
+      </a>
 
-      <div class="pt-4 flex items-center gap-5 border-t border-amber-100/70">
-        <a href="/cart" class="text-gray-700 hover:text-amber-700 text-3xl transition-colors">🛒</a>
-        <a href="/login" class="flex-1 px-6 py-3 bg-amber-600 hover:bg-amber-700 text-white font-semibold text-center rounded-xl transition-colors">
+      <a href="/about"
+        class="flex items-center justify-between rounded-xl px-4 py-3 text-gray-800 font-medium hover:bg-amber-50 hover:text-amber-700 transition-all duration-300">
+        <span>About Us</span>
+        <span class="text-amber-500">→</span>
+      </a>
+
+      <a href="/contact"
+        class="flex items-center justify-between rounded-xl px-4 py-3 text-gray-800 font-medium hover:bg-amber-50 hover:text-amber-700 transition-all duration-300">
+        <span>Contact</span>
+        <span class="text-amber-500">→</span>
+      </a>
+
+      <div class="pt-4 mt-4 border-t border-amber-100/80 flex items-center gap-3">
+        <a href="/cart"
+          class="inline-flex items-center justify-center w-12 h-12 rounded-xl border border-amber-100 bg-white text-gray-700 hover:text-amber-700 hover:bg-amber-50 transition-all duration-300 relative">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none"
+            viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-1 5h12M10 21a1 1 0 100-2 1 1 0 000 2zm8 0a1 1 0 100-2 1 1 0 000 2z" />
+          </svg>
+          <span
+            class="absolute -top-1.5 -right-1.5 min-w-[20px] h-5 px-1 rounded-full bg-amber-600 text-white text-[11px] font-bold flex items-center justify-center shadow">
+            2
+          </span>
+        </a>
+
+        <a href="/login"
+          class="flex-1 inline-flex items-center justify-center px-6 py-3 rounded-xl bg-amber-600 text-white font-semibold shadow-md hover:bg-amber-700 transition-all duration-300">
           Login
         </a>
       </div>
@@ -71,24 +130,43 @@
   </div>
 </nav>
 
-<!-- Add padding to body so content isn't hidden under fixed navbar -->
+<!-- Body spacing -->
 <style>
-  body { padding-top: 4rem; } /* ~64px for h-16 */
-  @media (min-width: 768px) {
-    body { padding-top: 4.5rem; } /* adjust for md:h-18 */
+  body {
+    padding-top: 72px;
   }
 </style>
 
-<!-- JavaScript for mobile toggle (vanilla JS - no framework needed) -->
+<!-- JS -->
 <script>
   const btn = document.getElementById('mobile-menu-btn');
   const menu = document.getElementById('mobile-menu');
   const openIcon = document.getElementById('menu-open');
   const closeIcon = document.getElementById('menu-close');
+  const navbar = document.getElementById('site-navbar');
 
   btn.addEventListener('click', () => {
-    menu.classList.toggle('hidden');
+    const isOpen = menu.classList.contains('max-h-[500px]');
+
+    if (isOpen) {
+      menu.classList.remove('max-h-[500px]', 'opacity-100');
+      menu.classList.add('max-h-0', 'opacity-0');
+    } else {
+      menu.classList.remove('max-h-0', 'opacity-0');
+      menu.classList.add('max-h-[500px]', 'opacity-100');
+    }
+
     openIcon.classList.toggle('hidden');
     closeIcon.classList.toggle('hidden');
+  });
+
+  window.addEventListener('scroll', () => {
+    if (window.scrollY > 20) {
+      navbar.classList.add('bg-white/95', 'shadow-md');
+      navbar.classList.remove('bg-white/80');
+    } else {
+      navbar.classList.remove('bg-white/95', 'shadow-md');
+      navbar.classList.add('bg-white/80');
+    }
   });
 </script>
