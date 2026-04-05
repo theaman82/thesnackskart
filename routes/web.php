@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Livewire\Admin\Category\CategoryList;
 use App\Livewire\Admin\Category\Create;
 use App\Livewire\Admin\Dashboard;
 use App\Livewire\Public\Home;
@@ -18,8 +19,16 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-Route::middleware(['auth', 'isAdmin'])->group(function () {
-    Route::get('/admin', Dashboard::class)->name('dashboard');
-    Route::get('/category/insert', Create::class)->name('category.create');
-});
+Route::middleware(['auth', 'isAdmin'])
+    ->prefix('admin')
+    ->name('admin.')
+    ->group(function () {
+        Route::get('/', Dashboard::class)->name('dashboard');
+
+        Route::get('/category/insert', Create::class)
+            ->name('category.create');
+
+        Route::get('/category/list', CategoryList::class)
+            ->name('category.list');
+    });
 require __DIR__ . '/auth.php';
