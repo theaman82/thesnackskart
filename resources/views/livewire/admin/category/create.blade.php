@@ -11,7 +11,7 @@
             <h2 class="text-2xl font-semibold text-gray-800">Add New Category</h2>
         </div>
 
-        <form wire:submit="store" class="p-6 space-y-6">
+        <form wire:submit="save" class="p-6 space-y-6">
             
             <!-- Parent Category -->
             <div>
@@ -21,7 +21,7 @@
                 <select 
                     wire:model="parent_id"
                     class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition">
-                    <option value="">No Parent (Main / Top Level Category)</option>
+                    <option value="">No Parent</option>
                     
                     @foreach($categories as $category)
                         <option value="{{ $category->id }}" 
