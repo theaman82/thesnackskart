@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use App\Livewire\Admin\Category\CategoryList;
 use App\Livewire\Admin\Category\Create;
 use App\Livewire\Admin\Dashboard;
+use App\Livewire\Admin\Product\Productcreate;
 use App\Livewire\Public\Home;
 use Illuminate\Support\Facades\Route;
 
@@ -30,5 +31,7 @@ Route::middleware(['auth', 'isAdmin'])
 
         Route::get('/category/list', CategoryList::class)
             ->name('category.list');
+        Route::get('/product/insert',Productcreate::class)
+        ->name('product.create');
     });
 require __DIR__ . '/auth.php';

@@ -93,13 +93,55 @@
                 </div>
             </div>
 
+
+         
+
             <!-- Products -->
-            <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-700/50 transition-all duration-200 text-gray-300 group">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+           <div x-data="{ ProductOpen: false }" class="relative">
+                <!-- Parent product Link -->
+                <a href="#" 
+                   @click.prevent="ProductOpen = !ProductOpen"
+                   class="flex items-center justify-between px-3 py-2.5 rounded-lg hover:bg-gray-700/50 transition-all duration-200 text-gray-300 group">
+                    <div class="flex items-center gap-3">
+                       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
                 </svg>
-                <span x-show="!collapsed" class="text-sm font-medium whitespace-nowrap">Products</span>
-            </a>
+                        <span x-show="!collapsed" class="text-sm font-medium whitespace-nowrap">Products</span>
+                    </div>
+                    <!-- Dropdown Arrow -->
+                    <svg x-show="!collapsed" 
+                         x-bind:class="{ 'rotate-180': ProductOpen }" 
+                         class="w-4 h-4 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </a>
+                
+                <!-- Dropdown Menu Items -->
+                <div x-show="ProductOpen && !collapsed" 
+                     x-transition:enter="transition ease-out duration-200"
+                     x-transition:enter-start="opacity-0 transform -translate-y-2"
+                     x-transition:enter-end="opacity-100 transform translate-y-0"
+                     class="ml-8 mt-1 space-y-1">
+                    
+                    <!-- Add Category -->
+                    <a href="{{ route('admin.product.create') }}" 
+                       class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-700/40 transition-all duration-200 text-gray-400 text-sm group">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                        </svg>
+                        <span>Add Product</span>
+                    </a>
+                    
+                    <!-- View Categories -->
+                    <a href="{{ route('admin.category.list') }}" 
+                       class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-700/40 transition-all duration-200 text-gray-400 text-sm group">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+                        <span>View Products</span>
+                    </a>
+                </div>
+            </div>
 
             <!-- Orders -->
             <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-700/50 transition-all duration-200 text-gray-300 group">
