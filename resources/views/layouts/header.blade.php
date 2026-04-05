@@ -84,10 +84,10 @@
                     <button @click="open = !open" 
                             class="flex items-center gap-2 focus:outline-none group">
                         <div class="w-8 h-8 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 flex items-center justify-center text-white text-sm font-bold shadow-md">
-                             {{ strtoupper(substr(auth()->user()->name, 0, 2)) }}
+                             {{ strtoupper(substr(auth()->user()->name ?? 'Gust', 0, 2)) }}
                         </div>
                         <div class="hidden sm:block text-left">
-                            <p class="text-sm font-medium text-gray-700">{{ auth()->user()->name }}</p>
+                            <p class="text-sm font-medium text-gray-700">{{ auth()->user()->name ?? 'Gust'}}</p>
                             {{-- <p class="text-xs text-gray-500">Administrator</p> --}}
                         </div>
                         <svg class="hidden sm:block w-4 h-4 text-gray-500 group-hover:text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">

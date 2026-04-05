@@ -1,5 +1,5 @@
 <nav x-data="{ collapsed: false }" :class="{ 'w-20': collapsed, 'w-64': !collapsed }"
-    class="bg-gradient-to-br from-gray-900 to-gray-800 text-white h-full transition-all duration-300 ease-in-out shadow-xl">
+    class="bg-gradient-to-br from-gray-900  overflow-auto to-gray-800 text-white h-full transition-all duration-300 ease-in-out shadow-xl">
 
     <div class="flex flex-col h-full">
         <!-- Logo/Brand Area -->
@@ -76,7 +76,7 @@
                     </a>
 
                     <!-- View Categories -->
-                    <a href=""
+                    <a href="{{ route('category.list') }}"
                         class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-700/40 transition-all duration-200 text-gray-400 text-sm group">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

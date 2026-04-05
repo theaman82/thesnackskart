@@ -1,5 +1,6 @@
 <?php
 
+use App\Livewire\Admin\Category\CategoryList;
 use App\Livewire\Admin\Category\Create;
 use App\Livewire\Admin\Dashboard;
 use Illuminate\Support\Facades\Route;
@@ -31,3 +32,4 @@ Route::get('/cart', function () {
   Route::get('/admin', Dashboard::class)->name('dashboard');  
 Route::get('/category/insert', Create::class)->name('category.create');
 
+ Route::get('/category/list',CategoryList::class)->name('category.list');
