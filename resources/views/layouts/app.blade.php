@@ -15,7 +15,9 @@
     <div>
         <x-navbar />
     </div>
-    @yield('content')
+    <main>
+        {{ $slot }}
+    </main>
 
     @livewireScripts
 </body>
