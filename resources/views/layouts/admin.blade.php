@@ -69,7 +69,8 @@
     </div>
 
     <!-- CRITICAL: Script order - Livewire pehle, then Filament, then Vite -->
-    @livewireScripts
+    
+     @livewireScripts
     @filamentScripts
     @vite(['resources/js/app.js'])
 </body>
