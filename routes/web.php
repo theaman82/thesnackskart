@@ -6,6 +6,7 @@ use App\Livewire\Admin\Category\Create;
 use App\Livewire\Admin\Dashboard;
 use App\Livewire\Admin\Product\Productcreate;
 use App\Livewire\Public\Home;
+use App\Livewire\User\Profile;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', Home::class)->name('home');
@@ -15,7 +16,8 @@ Route::get('/', Home::class)->name('home');
 // })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    // Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::get('/profile', Profile::class)->name('user.dashboard');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
