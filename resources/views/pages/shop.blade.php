@@ -51,7 +51,7 @@
                             <label class="flex items-center">
                                 <input type="checkbox" class="w-4 h-4 text-green-600">
                                 <span class="ml-2 text-gray-700">
-                                    @for($i = 0; $i < $rating; $i++)⭐@endfor (${{$rating}} & up)
+                                    @for($i = 0; $i < $rating; $i++)⭐@endfor
                                 </span>
                             </label>
                             @endforeach

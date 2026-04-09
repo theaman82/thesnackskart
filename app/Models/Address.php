@@ -9,4 +9,8 @@ class Address extends Model
 {
     use HasFactory;
     protected $gaurded=[];
+
+    public function user(){
+        return $this->belongsTo(User::class);
+    }
 }
