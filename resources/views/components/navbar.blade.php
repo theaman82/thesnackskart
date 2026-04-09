@@ -59,16 +59,69 @@
           </span>
         </a>
 
-        @auth
-          <h1>Hello, {{ auth()->user()->name }}</h1>
-          <form method="POST" action="{{ route('logout') }}">
-            @csrf
 
-            <x-dropdown-link :href="route('logout')" onclick="event.preventDefault();
-                                                  this.closest('form').submit();">
-              {{ __('Log Out') }}
-            </x-dropdown-link>
-          </form>
+        @auth
+          <div x-data="{ open: false }" class="relative inline-block text-left">
+            @php
+              $name = auth()->user()->name;
+              $initials = strtoupper(substr($name, 0, 1));
+            @endphp
+            <!-- Profile Button -->
+            <button @click="open = !open" @mouseenter="open = true" @mouseleave="open = false"
+              class="flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 transition-all duration-300 shadow-sm">
+              <div class="flex items-center gap-2">
+                <div
+                  class="w-9 h-9 flex items-center justify-center rounded-full bg-amber-600 text-white font-semibold shadow-md">
+                  {{ $initials }}
+                </div>
+                <span class="font-semibold text-gray-700">
+                  {{ auth()->user()->name }}
+                </span>
+              </div>
+
+
+              <!-- Arrow Icon -->
+              <svg class="w-4 h-4 text-gray-500 transition-transform duration-300" :class="{ 'rotate-180': open }"
+                fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+
+            <!-- Dropdown -->
+            <div x-show="open" @mouseenter="open = true" @mouseleave="open = false" x-transition
+              class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden z-50">
+              <!-- Profile -->
+              <a href="{{ route('user.dashboard') }}"
+                class="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 transition">
+                My Profile
+              </a>
+
+              <!-- Orders -->
+              <a href="#" class="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 transition">
+                Orders
+              </a>
+              <!-- Wishlist -->
+              <a href="#" class="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 transition">
+                Wishlist
+              </a>
+              <!-- Saved Address -->
+              <a href="#" class="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 transition">
+                Saved Address
+              </a>
+
+              <!-- Divider -->
+              <div class="border-t"></div>
+
+              <!-- Logout -->
+              <form method="POST" action="{{ route('logout') }}">
+                @csrf
+                <button type="submit" class="w-full text-left px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition">
+                  🚪 Logout
+                </button>
+              </form>
+            </div>
+
+          </div>
         @else
           <a href="{{ route('login') }}"
             class="inline-flex items-center justify-center px-6 lg:px-7 py-2.5 rounded-xl bg-amber-600 text-white font-semibold text-sm lg:text-base shadow-lg shadow-amber-200/50 hover:bg-amber-700 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-amber-300/50 transition-all duration-300">
