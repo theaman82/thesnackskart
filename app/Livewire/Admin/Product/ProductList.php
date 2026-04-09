@@ -1,0 +1,666 @@
+<?php
+
+namespace App\Livewire\Admin\Product;
+
+use App\Models\Product;
+use App\Models\Category;
+use App\Models\ProductVariant;
+use Filament\Forms\Contracts\HasForms;
+use Filament\Forms\Concerns\InteractsWithForms;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\ImageColumn;
+use Filament\Tables\Concerns\InteractsWithTable;
+use Filament\Tables\Contracts\HasTable;
+use Filament\Tables\Table;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TernaryFilter;
+use Filament\Tables\Filters\Filter;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Toggle;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\RichEditor;
+use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Grid;
+use Filament\Notifications\Notification;
+use Livewire\Component;
+use Illuminate\Database\Eloquent\Builder;
+use Filament\Tables\Actions\Action;
+use Filament\Tables\Actions\DeleteAction;
+use Filament\Tables\Actions\BulkActionGroup;
+use Filament\Tables\Actions\DeleteBulkAction;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\HtmlString;
+
+class ProductList extends Component implements HasForms, HasTable
+{
+    use InteractsWithForms;
+    use InteractsWithTable;
+
+    public function table(Table $table): Table
+    {
+        return $table
+            ->query(Product::with('variants', 'category'))
+            ->columns([
+                ImageColumn::make('featured_image')
+                    ->label('Image')
+                    ->circular()
+                    ->defaultImageUrl(
+                        fn($record) =>
+                        'https://ui-avatars.com/api/?background=0D8ABC&color=fff&name=' . urlencode($record->title)
+                    ),
+
+                TextColumn::make('id')
+                    ->label('ID')
+                    ->sortable()
+                    ->searchable(),
+
+                TextColumn::make('title')
+                    ->label('Product Name')
+                    ->searchable()
+                    ->sortable()
+                    ->limit(40),
+
+                TextColumn::make('category.title')
+                    ->label('Category')
+                    ->sortable()
+                    ->searchable()
+                    ->badge()
+                    ->color('success'),
+
+                TextColumn::make('variants_count')
+                    ->counts('variants')
+                    ->label('Variants')
+                    ->sortable()
+                    ->badge()
+                    ->color('info'),
+
+                // TextColumn::make('price_range')
+                //     ->label('Price Range')
+                //     ->formatStateUsing(function (Product $record) {
+                //         if ($record->variants->isEmpty()) {
+                //             return '-';
+                //         }
+                //         $min = $record->variants->min('sale_price');
+                //         $max = $record->variants->max('sale_price');
+                //         return $min == $max 
+                //             ? '₹' . number_format($min, 2) 
+                //             : '₹' . number_format($min, 2) . ' - ₹' . number_format($max, 2);
+                //     })
+                //     ->alignEnd(),
+
+                // TextColumn::make('total_stock')
+                //     ->label('Total Stock')
+                //     ->formatStateUsing(fn (Product $record) => $record->variants->sum('stock'))
+                //     ->badge()
+                //     ->color(fn ($state) => match(true) {
+                //         $state <= 0 => 'danger',
+                //         $state <= 10 => 'warning',
+                //         default => 'success'
+                //     }),
+
+                IconColumn::make('status')
+                    ->boolean()
+                    ->trueIcon('heroicon-o-check-badge')
+                    ->falseIcon('heroicon-o-x-circle')
+                    ->trueColor('success')
+                    ->falseColor('danger')
+                    ->sortable(),
+
+                      // ToggleColumn::make('status')
+                //     ->label('Status')
+                //     ->onColor('success')   // ON = green
+                //     ->offColor('danger')   // OFF = red
+                //     ->sortable(),
+
+
+                TextColumn::make('created_at')
+                    ->label('Created')
+                    ->dateTime('d M Y')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+
+                TextColumn::make('updated_at')
+                    ->label('Last Updated')
+                    ->dateTime('d M Y')
+                    ->sortable()
+                    ->since()
+                    ->toggleable(isToggledHiddenByDefault: true),
+            ])
+            ->filters([
+                SelectFilter::make('category')
+                    ->relationship('category', 'title')
+                    ->label('Category')
+                    ->placeholder('All Categories')
+                    ->multiple()
+                    ->preload(),
+
+                TernaryFilter::make('status')
+                    ->label('Status')
+                    ->placeholder('All Products')
+                    ->trueLabel('Active Only')
+                    ->falseLabel('Inactive Only'),
+
+                Filter::make('has_variants')
+                    ->label('Has Variants')
+                    ->query(fn(Builder $query) => $query->has('variants'))
+                    ->toggle(),
+
+                Filter::make('in_stock')
+                    ->label('In Stock')
+                    ->query(fn(Builder $query) => $query->whereHas('variants', fn($q) => $q->where('stock', '>', 0))),
+
+                Filter::make('low_stock')
+                    ->label('Low Stock (≤10)')
+                    ->query(fn(Builder $query) => $query->whereHas('variants', fn($q) => $q->where('stock', '<=', 10)->where('stock', '>', 0))),
+
+                Filter::make('out_of_stock')
+                    ->label('Out of Stock')
+                    ->query(
+                        fn(Builder $query) => $query
+                            ->whereDoesntHave('variants', fn($q) => $q->where('stock', '>', 0))
+                            ->orWhereHas('variants', fn($q) => $q->where('stock', '<=', 0))
+                    ),
+            ])
+            ->actions([
+                // ✅ FIXED: View Action
+                Action::make('view')
+                    ->label('View')
+                    ->color('success')
+                    ->icon('heroicon-o-eye')
+                    ->modalHeading('Product Details')
+                    ->modalContent(function (Product $record): HtmlString {
+                        $product = Product::with('variants', 'category')->findOrFail($record->id);
+                        return $this->getViewContent($product);
+                    })
+                    ->modalWidth('7xl'),
+
+                // Edit Action
+                Action::make('edit')
+                    ->fillForm(function (Product $record) {
+                        return [
+                            'category_id' => $record->category_id,
+                            'title' => $record->title,
+                            'slug' => $record->slug,
+                            'description' => $record->description,
+                            'featured_image' => $record->featured_image,
+                            'status' => $record->status,
+
+                            'variants' => $record->variants->map(function ($variant) {
+                                return [
+                                    'id' => $variant->id,
+                                    'sku' => $variant->sku,
+                                    'flavor' => $variant->flavor,
+                                    'weight' => $variant->weight,
+                                    'weight_unit' => $variant->weight_unit,
+                                    'pack_type' => $variant->pack_type,
+                                    'mrp' => $variant->mrp,
+                                    'sale_price' => $variant->sale_price,
+                                    'stock' => $variant->stock,
+                                    'image' => $variant->image,
+                                    'status' => $variant->status,
+                                ];
+                            })->toArray(),
+                        ];
+                    })
+                    ->label('Edit')
+                    ->color('warning')
+                    ->icon('heroicon-o-pencil')
+                    ->form(fn(Product $record) => $this->getEditFormSchema($record))
+                    ->action(function (Product $record, array $data): void {
+                        $record->update([
+                            'category_id' => $data['category_id'],
+                            'title' => $data['title'],
+                            'slug' => $data['slug'],
+                            'description' => $data['description'],
+                            'featured_image' => $data['featured_image'] ?? $record->featured_image,
+                            'status' => $data['status'],
+                        ]);
+
+                        if (isset($data['variants']) && is_array($data['variants'])) {
+                            $existingIds = $record->variants->pluck('id')->toArray();
+                            $updatedIds = [];
+
+                            foreach ($data['variants'] as $variantData) {
+                                if (!empty($variantData['id']) && in_array($variantData['id'], $existingIds)) {
+                                    $variant = ProductVariant::find($variantData['id']);
+                                    if ($variant) {
+                                        $variant->update($variantData);
+                                        $updatedIds[] = $variantData['id'];
+                                    }
+                                } else {
+                                    unset($variantData['id']);
+                                    $newVariant = $record->variants()->create($variantData);
+                                    $updatedIds[] = $newVariant->id;
+                                }
+                            }
+
+                            $toDelete = array_diff($existingIds, $updatedIds);
+                            if (!empty($toDelete)) {
+                                ProductVariant::whereIn('id', $toDelete)->delete();
+                            }
+                        }
+
+                        Notification::make()
+                            ->success()
+                            ->title('Product updated successfully')
+                            ->send();
+                    })
+                    ->modalWidth('7xl')
+                    ->modalHeading('Edit Product')
+                    ->modalSubmitActionLabel('Save Changes')
+                    ->modalSubmitAction(fn ($action)=>
+                    $action
+                    ->color(null)
+                    ->extraAttributes([
+                        'class'=>'bg-blue-600 text-white hover:bg-blue-700'
+                    ])
+                    )
+                    ,
+
+                DeleteAction::make()
+                    ->requiresConfirmation()
+                    ->modalDescription('This will also delete all associated variants.')
+                    ->modalSubmitAction(fn($action) =>
+                        $action
+                            ->color(null)
+                            ->extraAttributes([
+                                'class' => 'bg-red-600 text-white hover:bg-red-700'
+                            ])),
+            ])
+            ->headerActions([
+                Action::make('create')
+                    ->label('Add New Product')
+                    ->icon('heroicon-o-plus')
+                    ->color('success')
+                    ->extraAttributes([
+                        'class' => 'bg-blue-600 text-white hover:bg-blue-700'
+                    ])
+                    ->form(fn() => $this->getCreateFormSchema())
+                    ->action(function (array $data): void {
+                        $product = Product::create([
+                            'category_id' => $data['category_id'],
+                            'title' => $data['title'],
+                            'slug' => $data['slug'],
+                            'description' => $data['description'],
+                            'featured_image' => $data['featured_image'],
+                            'status' => $data['status'],
+                        ]);
+
+                        if (isset($data['variants']) && is_array($data['variants'])) {
+                            foreach ($data['variants'] as $variantData) {
+                                unset($variantData['id']);
+                                $product->variants()->create($variantData);
+                            }
+                        }
+
+                        Notification::make()
+                            ->success()
+                            ->title('Product created successfully')
+                            ->send();
+                    })
+                    ->modalWidth('7xl')
+                    ->modalHeading('Create New Product')
+                    ->modalSubmitActionLabel('Create Product')
+                    ->modalSubmitAction(
+                        fn($action) =>
+                        $action
+                            ->color(null) // 👈 important
+                            ->extraAttributes([
+                                'class' => 'bg-blue-600 text-white hover:bg-blue-700'
+                            ])
+                    )
+                ,
+            ])
+            ->bulkActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make()->requiresConfirmation(),
+                ]),
+            ])
+            ->defaultSort('created_at', 'desc')
+            ->searchPlaceholder('Search by product name or ID...')
+            ->emptyStateHeading('No products found')
+            ->emptyStateDescription('Create your first product to get started.')
+            ->emptyStateIcon('heroicon-o-shopping-bag')
+            ->paginated([10, 25, 50, 100])
+            ->defaultPaginationPageOption(10);
+    }
+
+    // ====================== VIEW MODAL ======================
+    protected function getViewContent(Product $product): HtmlString
+    {
+        $html = <<<HTML
+        <div class="space-y-6">
+            <div class="flex justify-center">
+                <img src="{$this->getImageUrl($product->featured_image)}" 
+                     alt="{$product->title}"
+                     class="h-40 w-40 object-cover rounded-lg shadow-lg">
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <h4 class="text-sm font-medium text-gray-500">Product Name</h4>
+                    <p class="mt-1 text-sm text-gray-900">{$product->title}</p>
+                </div>
+                <div>
+                    <h4 class="text-sm font-medium text-gray-500">Category</h4>
+                    <p class="mt-1">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                            {$product->category->title}
+                        </span>
+                    </p>
+                </div>
+                <div>
+                    <h4 class="text-sm font-medium text-gray-500">Slug</h4>
+                    <p class="mt-1 text-sm text-gray-900">{$product->slug}</p>
+                </div>
+                <div>
+                    <h4 class="text-sm font-medium text-gray-500">Status</h4>
+                    <p class="mt-1">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {$this->getStatusColor($product->status)}">
+                            {$this->getStatusText($product->status)}
+                        </span>
+                    </p>
+                </div>
+            </div>
+
+            {$this->getDescriptionHtml($product->description)}
+
+            <div>
+                <h4 class="text-sm font-medium text-gray-500 mb-3">Product Variants</h4>
+                {$this->getVariantsTableHtml($product->variants)}
+            </div>
+
+            <div class="grid grid-cols-3 gap-4 pt-4 border-t">
+                <div class="text-center">
+                    <p class="text-2xl font-bold text-gray-900">{$product->variants->count()}</p>
+                    <p class="text-sm text-gray-500">Total Variants</p>
+                </div>
+                <div class="text-center">
+                    <p class="text-2xl font-bold text-gray-900">{$product->variants->sum('stock')}</p>
+                    <p class="text-sm text-gray-500">Total Stock</p>
+                </div>
+                <div class="text-center">
+                    <p class="text-2xl font-bold text-gray-900">{$this->getPriceRangeHtml($product->variants)}</p>
+                    <p class="text-sm text-gray-500">Price Range</p>
+                </div>
+            </div>
+        </div>
+        HTML;
+
+        return new HtmlString($html);
+    }
+
+    protected function getImageUrl($path)
+    {
+        if ($path && Storage::disk('public')->exists($path)) {
+            return Storage::url($path);
+        }
+        return 'https://ui-avatars.com/api/?background=0D8ABC&color=fff&name=Product';
+    }
+
+    protected function getStatusColor($status): string
+    {
+        return $status ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
+    }
+
+    protected function getStatusText($status): string
+    {
+        return $status ? 'Active' : 'Inactive';
+    }
+
+    protected function getDescriptionHtml($description): string
+    {
+        if (!$description)
+            return '';
+        return <<<HTML
+        <div>
+            <h4 class="text-sm font-medium text-gray-500">Description</h4>
+            <div class="mt-1 prose prose-sm max-w-none">{$description}</div>
+        </div>
+        HTML;
+    }
+
+    protected function getVariantsTableHtml($variants): string
+    {
+        if (!$variants || $variants->count() === 0) {
+            return '<p class="text-sm text-gray-500">No variants available for this product.</p>';
+        }
+
+        $rows = '';
+        foreach ($variants as $variant) {
+            $stockClass = $variant->stock <= 0 ? 'text-red-600' : ($variant->stock <= 10 ? 'text-yellow-600' : 'text-green-600');
+            $stockText = $variant->stock <= 0 ? 'Out of Stock' : ($variant->stock <= 10 ? "{$variant->stock} left" : $variant->stock);
+
+            $rows .= <<<HTML
+            <tr>
+                <td class="px-4 py-2 text-sm">{$variant->sku}</td>
+                <td class="px-4 py-2 text-sm">{$variant->flavor}</td>
+                <td class="px-4 py-2 text-sm">{$variant->weight} {$variant->weight_unit}</td>
+                <td class="px-4 py-2 text-sm">₹{$variant->mrp}</td>
+                <td class="px-4 py-2 text-sm">₹{$variant->sale_price}</td>
+                <td class="px-4 py-2 text-sm"><span class="{$stockClass} font-medium">{$stockText}</span></td>
+                <td class="px-4 py-2 text-sm">{$this->getVariantStatusText($variant->status)}</td>
+            </tr>
+            HTML;
+        }
+
+        return <<<HTML
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">SKU</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Flavor</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Weight</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">MRP</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Sale Price</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Stock</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">{$rows}</tbody>
+            </table>
+        </div>
+        HTML;
+    }
+
+    protected function getVariantStatusText($status): string
+    {
+        return $status ? '✓ Active' : '✗ Inactive';
+    }
+
+    protected function getPriceRangeHtml($variants): string
+    {
+        if ($variants->count() === 0)
+            return '-';
+        $min = $variants->min('sale_price');
+        $max = $variants->max('sale_price');
+        return $min == $max
+            ? '₹' . number_format($min, 2)
+            : '₹' . number_format($min, 2) . ' - ₹' . number_format($max, 2);
+    }
+
+    // ====================== FORM SCHEMAS ======================
+    protected function getCreateFormSchema(): array
+    {
+        return [
+            Section::make('Product Information')
+                ->schema([
+                    Grid::make(2)->schema([
+                        Select::make('category_id')
+                            ->label('Category')
+                            ->options(Category::pluck('title', 'id'))
+                            ->required()
+                            ->searchable()
+                            ->preload()
+                            ->native(false),
+
+                        TextInput::make('title')
+                            ->label('Product Name')
+                            ->required()
+                            ->maxLength(255)
+                            ->live(onBlur: true)
+                            ->afterStateUpdated(fn($state, $set) => $set('slug', Str::slug($state))),
+                    ]),
+
+                    TextInput::make('slug')
+                        ->label('Slug')
+                        ->required()
+                        ->maxLength(255)
+                        ->unique(Product::class, 'slug'),
+
+                    RichEditor::make('description')
+                        ->label('Description')
+                        ->columnSpanFull(),
+
+                    Grid::make(2)->schema([
+                        FileUpload::make('featured_image')
+                            ->label('Featured Image')
+                            ->image()
+                            ->directory('products')
+                            ->imageResizeMode('cover')
+                            ->imageCropAspectRatio('1:1')
+                            ->columnSpanFull(),
+
+                        Toggle::make('status')
+                            ->label('Active')
+                            ->default(true),
+                    ]),
+                ]),
+
+            Section::make('Product Variants')
+                ->schema([
+                    Repeater::make('variants')
+                        ->label('Variants')
+                        ->schema($this->getVariantSchema())
+                        ->defaultItems(1)
+                        ->maxItems(10)
+                        ->collapsible()
+                        ->cloneable()
+                        ->itemLabel(fn(array $state) => $state['flavor'] ?? 'New Variant')
+                        ->columnSpanFull(),
+                ])
+        ];
+    }
+
+    protected function getEditFormSchema(Product $record): array
+    {
+
+
+        return [
+            Section::make('Product Information')
+                ->schema([
+                    Grid::make(2)->schema([
+                        Select::make('category_id')
+                            ->label('Category')
+                            ->options(Category::pluck('title', 'id'))
+                            ->required()
+                            ->searchable()
+                            ->preload()
+                            ->native(false),
+
+                        TextInput::make('title')
+                            ->label('Product Name')
+                            ->required()
+                            ->maxLength(255),
+                    ]),
+
+                    TextInput::make('slug')
+                        ->label('Slug')
+                        ->required()
+                        ->maxLength(255)
+                        ->unique(Product::class, 'slug', ignorable: $record),
+
+                    RichEditor::make('description')
+                        ->label('Description')
+                        ->columnSpanFull(),
+
+                    Grid::make(2)->schema([
+                        FileUpload::make('featured_image')
+                            ->label('Featured Image')
+                            ->image()
+                            ->directory('products')
+                            ->imageResizeMode('cover')
+                            ->imageCropAspectRatio('1:1')
+                            ->columnSpanFull(),
+
+                        Toggle::make('status')
+                            ->label('Active')
+                        ,
+                    ]),
+                ]),
+
+            Section::make('Product Variants')
+                ->schema([
+                    Repeater::make('variants')
+                        ->label('Variants')
+                        ->schema($this->getVariantSchema())
+                        ->defaultItems(1)
+                        ->maxItems(10)
+                        ->collapsible()
+                        ->cloneable()
+                        ->itemLabel(fn(array $state) => $state['flavor'] ?? 'New Variant')
+                        ->columnSpanFull(),
+                ])
+        ];
+    }
+
+    protected function getVariantSchema(): array
+    {
+        return [
+            Grid::make(3)->schema([
+                TextInput::make('id')->hidden(),
+
+                TextInput::make('sku')->label('SKU')->required()->maxLength(255),
+                TextInput::make('flavor')->label('Flavor')->maxLength(255),
+                TextInput::make('weight')->label('Weight')->numeric()->step(0.01),
+
+                Select::make('weight_unit')
+                    ->label('Weight Unit')
+                    ->options(['g' => 'Grams (g)', 'kg' => 'Kilograms (kg)', 'ml' => 'Milliliters (ml)', 'l' => 'Liters (l)'])
+                    ->default('g'),
+
+                TextInput::make('pack_type')->label('Pack Type')->placeholder('e.g., Pouch, Jar'),
+
+                TextInput::make('mrp')
+                    ->label('MRP')
+                    ->required()
+                    ->numeric()
+                    ->prefix('₹')
+                    ->step(0.01),
+
+                TextInput::make('sale_price')
+                    ->label('Sale Price')
+                    ->required()
+                    ->numeric()
+                    ->prefix('₹')
+                    ->step(0.01),
+
+                TextInput::make('stock')
+                    ->label('Stock Quantity')
+                    ->required()
+                    ->numeric()
+                    ->minValue(0),
+
+                FileUpload::make('image')
+                    ->label('Variant Image')
+                    ->image()
+                    ->directory('variants')
+                    ->nullable(),
+
+                Toggle::make('status')
+                    ->label('Active'),
+            ])
+        ];
+    }
+
+    public function render()
+    {
+        return view('livewire.admin.product.product-list')
+            ->layout('layouts.admin');
+    }
+}
