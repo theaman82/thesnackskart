@@ -6,6 +6,7 @@ use App\Livewire\Admin\Category\Create;
 use App\Livewire\Admin\Dashboard;
 use App\Livewire\Admin\Product\Productcreate;
 use App\Livewire\Admin\Product\ProductList;
+use App\Livewire\Admin\User\ManageUsers;
 use App\Livewire\Public\Home;
 use App\Livewire\User\Profile;
 use Illuminate\Support\Facades\Route;
@@ -38,5 +39,6 @@ Route::middleware(['auth', 'isAdmin'])
         ->name('product.create');
         Route::get('/product/list',ProductList::class)
         ->name('product.list');
+        Route::get('/manage/users', ManageUsers::class)->name('manage.user');
     });
 require __DIR__ . '/auth.php';
