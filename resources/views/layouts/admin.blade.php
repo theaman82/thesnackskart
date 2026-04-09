@@ -10,7 +10,11 @@
     @filamentStyles
     @vite(['resources/css/app.css'])
     @livewireStyles
-
+    <script>
+        if (localStorage.getItem('theme') === 'dark') {
+            document.documentElement.classList.add('dark');
+        }
+    </script>
     <style>
         [x-cloak] {
             display: none !important;
@@ -69,10 +73,29 @@
     </div>
 
     <!-- CRITICAL: Script order - Livewire pehle, then Filament, then Vite -->
-    
-     @livewireScripts
+
+    @livewireScripts
     @filamentScripts
     @vite(['resources/js/app.js'])
+    <script>
+        const toggleBtn = document.getElementById('theme-toggle');
+
+        // Load saved theme
+        if (localStorage.getItem('theme') === 'dark') {
+            document.documentElement.classList.add('dark');
+        }
+
+        toggleBtn.addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+
+            // Save preference
+            if (document.documentElement.classList.contains('dark')) {
+                localStorage.setItem('theme', 'dark');
+            } else {
+                localStorage.setItem('theme', 'light');
+            }
+        });
+    </script>
 </body>
 
 </html>

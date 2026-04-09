@@ -81,7 +81,7 @@
 
     <!-- Back Button -->
     <div class="mt-6 text-center">
-        <a href="{{ route('dashboard') }}" 
+        <a href="{{ route('admin.dashboard') }}" 
            class="text-gray-500 hover:text-gray-700 text-sm flex items-center justify-center gap-2">
             ← Back to Dashboard
         </a>
