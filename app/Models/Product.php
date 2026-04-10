@@ -27,7 +27,10 @@ class Product extends Model
         return $this->hasMany(ProductVariant::class);
     }
 // App/Models/Product.php
-
+  public function orderItems()
+    {
+        return $this->hasMany(OrderItem::class);
+    }
   
     
 }
