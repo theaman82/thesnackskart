@@ -9,6 +9,8 @@ use App\Livewire\Admin\Product\Productcreate;
 use App\Livewire\Admin\Product\ProductList;
 use App\Livewire\Admin\User\ManageUsers;
 use App\Livewire\Public\Home;
+use App\Livewire\User\ManageAddress;
+use App\Livewire\User\ManageOrders;
 use App\Livewire\User\Profile;
 use Illuminate\Support\Facades\Route;
 
@@ -20,7 +22,9 @@ Route::get('/', Home::class)->name('home');
 
 Route::middleware('auth')->group(function () {
     // Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::get('/profile', Profile::class)->name('user.dashboard');
+    Route::get('/profile', Profile::class)->name('user.profile');
+    Route::get('/profile/manage-orders', ManageOrders::class)->name('user.manage-order');
+    Route::get('/profile/manage-address', ManageAddress::class)->name('user.manage-address');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });

@@ -91,13 +91,13 @@
             <div x-show="open" @mouseenter="open = true" @mouseleave="open = false" x-transition
               class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden z-50">
               <!-- Profile -->
-              <a href="{{ route('user.dashboard') }}"
+              <a href="{{ route('user.profile') }}"
                 class="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 transition">
                 My Profile
               </a>
 
               <!-- Orders -->
-              <a href="#" class="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 transition">
+              <a href="{{ route('user.manage-order') }}" class="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 transition">
                 Orders
               </a>
               <!-- Wishlist -->
@@ -105,7 +105,7 @@
                 Wishlist
               </a>
               <!-- Saved Address -->
-              <a href="#" class="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 transition">
+              <a href="{{ route('user.manage-address') }}" class="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-100 transition">
                 Saved Address
               </a>
 

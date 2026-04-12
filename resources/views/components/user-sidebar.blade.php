@@ -9,13 +9,19 @@
     <nav class="p-4 space-y-2">
 
         <!-- Profile -->
-        <a href="#"
-            class="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-700 hover:bg-amber-100 hover:text-amber-700 transition">
+        <a href="{{ route('user.profile') }}" isActive class="flex items-center gap-3 px-4 py-2 rounded-lg  transition {{ request()->routeIs('user.profile')
+    ? 'bg-amber-100 text-amber-700'
+    : 'text-gray-700 hover:bg-amber-100 hover:text-amber-700' }}">
             👤 <span>Profile Information</span>
         </a>
 
+        <!-- Orders -->
+        <a href="{{ route('user.manage-order') }}"
+            class="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-700 hover:bg-amber-100 hover:text-amber-700 transition">
+            📦 <span>Manage Orders</span>
+        </a>
         <!-- Address -->
-        <a href="#"
+        <a href="{{ route('user.manage-address') }}"
             class="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-700 hover:bg-amber-100 hover:text-amber-700 transition">
             📍 <span>Manage Address</span>
         </a>
@@ -26,11 +32,7 @@
             ❤️ <span>Wishlist</span>
         </a>
 
-        <!-- Orders -->
-        <a href="#"
-            class="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-700 hover:bg-amber-100 hover:text-amber-700 transition">
-            📦 <span>Manage Orders</span>
-        </a>
+
 
         <!-- Divider -->
         <div class="border-t my-3"></div>
