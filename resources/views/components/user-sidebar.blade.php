@@ -9,19 +9,19 @@
     <nav class="p-4 space-y-2">
 
         <!-- Profile -->
-        <a href="{{ route('user.profile') }}" isActive class="flex items-center gap-3 px-4 py-2 rounded-lg  transition {{ request()->routeIs('user.profile')
+        <a href="{{ route('user.profile') }}" wire:navigate isActive class="flex items-center gap-3 px-4 py-2 rounded-lg  transition {{ request()->routeIs('user.profile')
     ? 'bg-amber-100 text-amber-700'
     : 'text-gray-700 hover:bg-amber-100 hover:text-amber-700' }}">
             👤 <span>Profile Information</span>
         </a>
 
         <!-- Orders -->
-        <a href="{{ route('user.manage-order') }}"
+        <a href="{{ route('user.manage-order') }}" wire:navigate
             class="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-700 hover:bg-amber-100 hover:text-amber-700 transition">
             📦 <span>Manage Orders</span>
         </a>
         <!-- Address -->
-        <a href="{{ route('user.manage-address') }}"
+        <a href="{{ route('user.manage-address') }}" wire:navigate
             class="flex items-center gap-3 px-4 py-2 rounded-lg text-gray-700 hover:bg-amber-100 hover:text-amber-700 transition">
             📍 <span>Manage Address</span>
         </a>
