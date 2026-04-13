@@ -18,7 +18,8 @@ use Filament\Tables\Contracts\HasTable;
 use Filament\Tables\Table;
 use Filament\Notifications\Notification;
 use Livewire\Component;
-
+use Filament\Tables\Actions\CreateAction;
+use Filament\Tables\Actions\ActionGroup;
 class CategoryList extends Component implements HasForms, HasActions, HasTable
 {
     use InteractsWithForms;
@@ -47,16 +48,66 @@ class CategoryList extends Component implements HasForms, HasActions, HasTable
                     ->dateTime('d-m-Y')
                     ->sortable(),
             ])
+            ->headerActions([
+                CreateAction::make()
+                    ->label('New Category')
+                    ->icon('heroicon-o-plus')
+                    ->color('success')
+                    ->extraAttributes([
+                                                'class' => 'bg-blue-600 text-white hover:bg-blue-700'
+
+                    ])
+                    ->createAnother(false)
+                    ->modalHeading('Create New Category')
+                    ->modalSubheading('Add a new category to your collection')
+                    ->modalWidth('sm')
+                    ->modalCancelActionLabel('Cancel')
+                    ->modalFooterActionsAlignment('end')
+                    ->form([
+                        TextInput::make('title')
+                            ->required()
+                            ->maxLength(255)
+                            ->label('Category Title')
+                            ->placeholder('Enter category name...')
+                            ->extraAttributes(['class' => 'rounded-xl'])
+                            ->columnSpan(1),
+
+                        Select::make('parent_id')
+                            ->label('Parent Category')
+                            ->relationship('parent', 'title')
+                            ->preload()
+                            ->placeholder('Select Parent Category')
+                            ->columnSpan(1),
+
+                        Textarea::make('description')
+                            ->label('Description')
+                            ->placeholder('Write something about this category...')
+                            ->rows(4)
+                            ->extraAttributes(['class' => 'rounded-xl'])
+                            ->columnSpanFull(),
+                    ])
+                    ->using(function (array $data): Category {
+                        $category = Category::create($data);
+
+                        Notification::make()
+                            ->title('✅ Category created successfully!')
+                            ->success()
+                            ->duration(2000)
+                            ->send();
+
+                        return $category;
+                    })
+                    ->successNotification(null),
+            ])
             ->actions([
+                ActionGroup::make([
                 EditAction::make()
                     ->label('Edit')
                     ->icon('heroicon-o-pencil-square')
                     ->color('warning')
-
-                    ->modalHeading(' Edit Category')
+                    ->modalHeading('Edit Category')
                     ->modalSubheading('Update category details below')
                     ->modalWidth('sm')
-
                     ->modalSubmitActionLabel('Update Category')
                     ->modalCancelActionLabel('Cancel')
                     ->modalFooterActionsAlignment('end')
@@ -66,18 +117,15 @@ class CategoryList extends Component implements HasForms, HasActions, HasTable
                             ->maxLength(255)
                             ->label('Category Title')
                             ->placeholder('Enter category name...')
-                            ->helperText('This name will be visible to users')
                             ->extraAttributes(['class' => 'rounded-xl'])
                             ->columnSpan(1),
 
                         Select::make('parent_id')
-                            ->label('parent Category')
+                            ->label('Parent Category')
                             ->relationship('parent', 'title')
                             ->preload()
                             ->placeholder('Select Parent Category')
                             ->columnSpan(1),
-
-
 
                         Textarea::make('description')
                             ->label('Description')
@@ -87,7 +135,6 @@ class CategoryList extends Component implements HasForms, HasActions, HasTable
                             ->extraAttributes(['class' => 'rounded-xl'])
                             ->columnSpanFull(),
                     ])
-
                     ->using(function (Category $record, array $data): Category {
                         $record->update($data);
 
@@ -117,6 +164,7 @@ class CategoryList extends Component implements HasForms, HasActions, HasTable
 
                         return true;
                     }),
+            ])
             ])
             ->bulkActions([
                 \Filament\Tables\Actions\BulkActionGroup::make([
