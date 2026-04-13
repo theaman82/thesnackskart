@@ -34,6 +34,7 @@ use Filament\Tables\Actions\DeleteBulkAction;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\HtmlString;
+use Filament\Tables\Actions\ActionGroup;
 
 class ProductList extends Component implements HasForms, HasTable
 {
@@ -166,6 +167,7 @@ class ProductList extends Component implements HasForms, HasTable
                     ),
             ])
             ->actions([
+                ActionGroup::make([
                 // ✅ FIXED: View Action
                 Action::make('view')
                     ->label('View')
@@ -270,6 +272,7 @@ class ProductList extends Component implements HasForms, HasTable
                             ->extraAttributes([
                                 'class' => 'bg-red-600 text-white hover:bg-red-700'
                             ])),
+            ])
             ])
             ->headerActions([
                 Action::make('create')
