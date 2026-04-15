@@ -39,15 +39,35 @@ use Filament\Tables\Actions\ActionGroup;
 class ProductList extends Component implements HasForms, HasTable
 {
     use InteractsWithForms;
-    use InteractsWithTable;
+    use InteractsWithTable; 
 
     public function table(Table $table): Table
     {
         return $table
-            ->query(Product::with('variants', 'category'))
+            ->query(Product::with('variants', 'category', 'images'))
             ->columns([
-                ImageColumn::make('featured_image')
+
+                ImageColumn::make('primary_image')
                     ->label('Image')
+                    ->getStateUsing(function ($record) {
+
+                        // 1. Variant image (priority)
+                        $variant = $record->variants->first();
+                        if ($variant && $variant->image) {
+                            return asset('storage/' . $variant->image);
+                        }
+
+                        // 2. Product primary image
+                        $image = optional(
+                            $record->images->where('is_primary', true)->first()
+                        )->image_url;
+
+                        if ($image) {
+                            return asset('storage/' . $image);
+                        }
+
+                        return null;
+                    })
                     ->circular()
                     ->defaultImageUrl(
                         fn($record) =>
@@ -79,30 +99,6 @@ class ProductList extends Component implements HasForms, HasTable
                     ->badge()
                     ->color('info'),
 
-                // TextColumn::make('price_range')
-                //     ->label('Price Range')
-                //     ->formatStateUsing(function (Product $record) {
-                //         if ($record->variants->isEmpty()) {
-                //             return '-';
-                //         }
-                //         $min = $record->variants->min('sale_price');
-                //         $max = $record->variants->max('sale_price');
-                //         return $min == $max 
-                //             ? '₹' . number_format($min, 2) 
-                //             : '₹' . number_format($min, 2) . ' - ₹' . number_format($max, 2);
-                //     })
-                //     ->alignEnd(),
-
-                // TextColumn::make('total_stock')
-                //     ->label('Total Stock')
-                //     ->formatStateUsing(fn (Product $record) => $record->variants->sum('stock'))
-                //     ->badge()
-                //     ->color(fn ($state) => match(true) {
-                //         $state <= 0 => 'danger',
-                //         $state <= 10 => 'warning',
-                //         default => 'success'
-                //     }),
-
                 IconColumn::make('status')
                     ->boolean()
                     ->trueIcon('heroicon-o-check-badge')
@@ -110,13 +106,6 @@ class ProductList extends Component implements HasForms, HasTable
                     ->trueColor('success')
                     ->falseColor('danger')
                     ->sortable(),
-
-                      // ToggleColumn::make('status')
-                //     ->label('Status')
-                //     ->onColor('success')   // ON = green
-                //     ->offColor('danger')   // OFF = red
-                //     ->sortable(),
-
 
                 TextColumn::make('created_at')
                     ->label('Created')
@@ -168,111 +157,142 @@ class ProductList extends Component implements HasForms, HasTable
             ])
             ->actions([
                 ActionGroup::make([
-                // ✅ FIXED: View Action
-                Action::make('view')
-                    ->label('View')
-                    ->color('success')
-                    ->icon('heroicon-o-eye')
-                    ->modalHeading('Product Details')
-                    ->modalContent(function (Product $record): HtmlString {
-                        $product = Product::with('variants', 'category')->findOrFail($record->id);
-                        return $this->getViewContent($product);
-                    })
-                    ->modalWidth('7xl'),
+                    Action::make('view')
+                        ->label('View')
+                        ->color('success')
+                        ->icon('heroicon-o-eye')
+                        ->modalHeading('Product Details')
+                        ->modalContent(function (Product $record): HtmlString {
+                            $product = Product::with('variants', 'category')->findOrFail($record->id);
+                            return $this->getViewContent($product);
+                        })
+                        ->modalWidth('7xl'),
 
-                // Edit Action
-                Action::make('edit')
-                    ->fillForm(function (Product $record) {
-                        return [
-                            'category_id' => $record->category_id,
-                            'title' => $record->title,
-                            'slug' => $record->slug,
-                            'description' => $record->description,
-                            'featured_image' => $record->featured_image,
-                            'status' => $record->status,
+                    Action::make('edit')
+                        ->fillForm(function (Product $record) {
+                            return [
+                                'category_id' => $record->category_id,
+                                'title' => $record->title,
+                                'slug' => $record->slug,
+                                'description' => $record->description,
+                                'status' => $record->status,
+                                'images' => $record->images->pluck('image_url')->toArray(),
+                                'variants' => $record->variants->map(function ($variant) {
+                                    return [
+                                        'id' => $variant->id,
+                                        'sku' => $variant->sku,
+                                        'flavor' => $variant->flavor,
+                                        'weight' => $variant->weight,
+                                        'weight_unit' => $variant->weight_unit,
+                                        'pack_type' => $variant->pack_type,
+                                        'mrp' => $variant->mrp,
+                                        'sale_price' => $variant->sale_price,
+                                        'stock' => $variant->stock,
+                                        'variant_image' => $variant->image, // Renamed to avoid confusion
+                                        'status' => $variant->status,
+                                    ];
+                                })->toArray(),
+                            ];
+                        })
+                        ->label('Edit')
+                        ->color('warning')
+                        ->icon('heroicon-o-pencil')
+                        ->form(fn(Product $record) => $this->getEditFormSchema($record))
+                        ->action(function (Product $record, array $data): void {
+                            $record->update([
+                                'category_id' => $data['category_id'],
+                                'title' => $data['title'],
+                                'slug' => $data['slug'],
+                                'description' => $data['description'],
+                                'status' => $data['status'],
+                            ]);
 
-                            'variants' => $record->variants->map(function ($variant) {
-                                return [
-                                    'id' => $variant->id,
-                                    'sku' => $variant->sku,
-                                    'flavor' => $variant->flavor,
-                                    'weight' => $variant->weight,
-                                    'weight_unit' => $variant->weight_unit,
-                                    'pack_type' => $variant->pack_type,
-                                    'mrp' => $variant->mrp,
-                                    'sale_price' => $variant->sale_price,
-                                    'stock' => $variant->stock,
-                                    'image' => $variant->image,
-                                    'status' => $variant->status,
-                                ];
-                            })->toArray(),
-                        ];
-                    })
-                    ->label('Edit')
-                    ->color('warning')
-                    ->icon('heroicon-o-pencil')
-                    ->form(fn(Product $record) => $this->getEditFormSchema($record))
-                    ->action(function (Product $record, array $data): void {
-                        $record->update([
-                            'category_id' => $data['category_id'],
-                            'title' => $data['title'],
-                            'slug' => $data['slug'],
-                            'description' => $data['description'],
-                            'featured_image' => $data['featured_image'] ?? $record->featured_image,
-                            'status' => $data['status'],
-                        ]);
-
-                        if (isset($data['variants']) && is_array($data['variants'])) {
-                            $existingIds = $record->variants->pluck('id')->toArray();
-                            $updatedIds = [];
-
-                            foreach ($data['variants'] as $variantData) {
-                                if (!empty($variantData['id']) && in_array($variantData['id'], $existingIds)) {
-                                    $variant = ProductVariant::find($variantData['id']);
-                                    if ($variant) {
-                                        $variant->update($variantData);
-                                        $updatedIds[] = $variantData['id'];
+                            // Handle Product Images (Gallery)
+                            $record->images()->whereNull('variant_id')->delete();
+                            if (!empty($data['images'])) {
+                                $isFirst = true;
+                                foreach ($data['images'] as $img) {
+                                    $imagePath = is_array($img) ? ($img['path'] ?? null) : $img;
+                                    if ($imagePath) {
+                                        $record->images()->create([
+                                            'image_url' => $imagePath,
+                                            'is_primary' => $isFirst,
+                                            'variant_id' => null, // Product level image
+                                        ]);
+                                        $isFirst = false;
                                     }
-                                } else {
-                                    unset($variantData['id']);
-                                    $newVariant = $record->variants()->create($variantData);
-                                    $updatedIds[] = $newVariant->id;
                                 }
                             }
 
-                            $toDelete = array_diff($existingIds, $updatedIds);
-                            if (!empty($toDelete)) {
-                                ProductVariant::whereIn('id', $toDelete)->delete();
+                            // Handle Variants with their own images
+                            if (isset($data['variants']) && is_array($data['variants'])) {
+                                $existingIds = $record->variants->pluck('id')->toArray();
+                                $updatedIds = [];
+
+                                foreach ($data['variants'] as $variantData) {
+                                    $variantImage = $variantData['variant_image'] ?? null;
+                                    unset($variantData['variant_image']);
+
+                                    if (!empty($variantData['id']) && in_array($variantData['id'], $existingIds)) {
+                                        $variant = ProductVariant::find($variantData['id']);
+                                        if ($variant) {
+                                            // Handle variant image
+                                            if ($variantImage) {
+                                                $imagePath = is_array($variantImage) ? ($variantImage['path'] ?? null) : $variantImage;
+                                                if ($imagePath) {
+                                                    $variantData['image'] = $imagePath;
+                                                }
+                                            }
+                                            $variant->update($variantData);
+                                            $updatedIds[] = $variantData['id'];
+                                        }
+                                    } else {
+                                        unset($variantData['id']);
+                                        // Handle variant image
+                                        if ($variantImage) {
+                                            $imagePath = is_array($variantImage) ? ($variantImage['path'] ?? null) : $variantImage;
+                                            if ($imagePath) {
+                                                $variantData['image'] = $imagePath;
+                                            }
+                                        }
+                                        $newVariant = $record->variants()->create($variantData);
+                                        $updatedIds[] = $newVariant->id;
+                                    }
+                                }
+
+                                $toDelete = array_diff($existingIds, $updatedIds);
+                                if (!empty($toDelete)) {
+                                    ProductVariant::whereIn('id', $toDelete)->delete();
+                                }
                             }
-                        }
 
-                        Notification::make()
-                            ->success()
-                            ->title('Product updated successfully')
-                            ->send();
-                    })
-                    ->modalWidth('7xl')
-                    ->modalHeading('Edit Product')
-                    ->modalSubmitActionLabel('Save Changes')
-                    ->modalSubmitAction(fn ($action)=>
-                    $action
-                    ->color(null)
-                    ->extraAttributes([
-                        'class'=>'bg-blue-600 text-white hover:bg-blue-700'
-                    ])
-                    )
-                    ,
+                            Notification::make()
+                                ->success()
+                                ->title('Product updated successfully')
+                                ->send();
+                        })
+                        ->modalWidth('7xl')
+                        ->modalHeading('Edit Product')
+                        ->modalSubmitActionLabel('Save Changes')
+                        ->modalSubmitAction(
+                            fn($action) =>
+                            $action
+                                ->color(null)
+                                ->extraAttributes([
+                                    'class' => 'bg-blue-600 text-white hover:bg-blue-700'
+                                ])
+                        ),
 
-                DeleteAction::make()
-                    ->requiresConfirmation()
-                    ->modalDescription('This will also delete all associated variants.')
-                    ->modalSubmitAction(fn($action) =>
-                        $action
-                            ->color(null)
-                            ->extraAttributes([
-                                'class' => 'bg-red-600 text-white hover:bg-red-700'
-                            ])),
-            ])
+                    DeleteAction::make()
+                        ->requiresConfirmation()
+                        ->modalDescription('This will also delete all associated variants and images.')
+                        ->modalSubmitAction(fn($action) =>
+                            $action
+                                ->color(null)
+                                ->extraAttributes([
+                                    'class' => 'bg-red-600 text-white hover:bg-red-700'
+                                ])),
+                ])
             ])
             ->headerActions([
                 Action::make('create')
@@ -289,12 +309,38 @@ class ProductList extends Component implements HasForms, HasTable
                             'title' => $data['title'],
                             'slug' => $data['slug'],
                             'description' => $data['description'],
-                            'featured_image' => $data['featured_image'],
                             'status' => $data['status'],
                         ]);
 
+                        // Save product gallery images
+                        if (!empty($data['images'])) {
+                            $isFirst = true;
+                            foreach ($data['images'] as $img) {
+                                $imagePath = is_array($img) ? ($img['path'] ?? null) : $img;
+                                if ($imagePath) {
+                                    $product->images()->create([
+                                        'image_url' => $imagePath,
+                                        'is_primary' => $isFirst,
+                                        'variant_id' => null,
+                                    ]);
+                                    $isFirst = false;
+                                }
+                            }
+                        }
+
+                        // Save variants with their own images
                         if (isset($data['variants']) && is_array($data['variants'])) {
                             foreach ($data['variants'] as $variantData) {
+                                $variantImage = $variantData['variant_image'] ?? null;
+                                unset($variantData['variant_image']);
+
+                                if ($variantImage) {
+                                    $imagePath = is_array($variantImage) ? ($variantImage['path'] ?? null) : $variantImage;
+                                    if ($imagePath) {
+                                        $variantData['image'] = $imagePath;
+                                    }
+                                }
+
                                 unset($variantData['id']);
                                 $product->variants()->create($variantData);
                             }
@@ -311,12 +357,11 @@ class ProductList extends Component implements HasForms, HasTable
                     ->modalSubmitAction(
                         fn($action) =>
                         $action
-                            ->color(null) // 👈 important
+                            ->color(null)
                             ->extraAttributes([
                                 'class' => 'bg-blue-600 text-white hover:bg-blue-700'
                             ])
-                    )
-                ,
+                    ),
             ])
             ->bulkActions([
                 BulkActionGroup::make([
@@ -332,13 +377,17 @@ class ProductList extends Component implements HasForms, HasTable
             ->defaultPaginationPageOption(10);
     }
 
-    // ====================== VIEW MODAL ======================
     protected function getViewContent(Product $product): HtmlString
     {
+        // Get product gallery images
+        $productImages = $product->images->whereNull('variant_id');
+        $primaryImage = optional($productImages->where('is_primary', true)->first())->image_url;
+        $imageUrl = $this->getImageUrl($primaryImage);
+
         $html = <<<HTML
         <div class="space-y-6">
             <div class="flex justify-center">
-                <img src="{$this->getImageUrl($product->featured_image)}" 
+                <img src="{$imageUrl}" 
                      alt="{$product->title}"
                      class="h-40 w-40 object-cover rounded-lg shadow-lg">
             </div>
@@ -438,8 +487,12 @@ class ProductList extends Component implements HasForms, HasTable
             $stockClass = $variant->stock <= 0 ? 'text-red-600' : ($variant->stock <= 10 ? 'text-yellow-600' : 'text-green-600');
             $stockText = $variant->stock <= 0 ? 'Out of Stock' : ($variant->stock <= 10 ? "{$variant->stock} left" : $variant->stock);
 
+            // Get variant image
+            $variantImage = $variant->image ? '<img src="' . Storage::url($variant->image) . '" class="h-8 w-8 object-cover rounded">' : '-';
+
             $rows .= <<<HTML
             <tr>
+                <td class="px-4 py-2 text-sm">{$variantImage}</td>
                 <td class="px-4 py-2 text-sm">{$variant->sku}</td>
                 <td class="px-4 py-2 text-sm">{$variant->flavor}</td>
                 <td class="px-4 py-2 text-sm">{$variant->weight} {$variant->weight_unit}</td>
@@ -456,6 +509,7 @@ class ProductList extends Component implements HasForms, HasTable
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
                     <tr>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Image</th>
                         <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">SKU</th>
                         <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Flavor</th>
                         <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Weight</th>
@@ -487,7 +541,6 @@ class ProductList extends Component implements HasForms, HasTable
             : '₹' . number_format($min, 2) . ' - ₹' . number_format($max, 2);
     }
 
-    // ====================== FORM SCHEMAS ======================
     protected function getCreateFormSchema(): array
     {
         return [
@@ -520,19 +573,19 @@ class ProductList extends Component implements HasForms, HasTable
                         ->label('Description')
                         ->columnSpanFull(),
 
-                    Grid::make(2)->schema([
-                        FileUpload::make('featured_image')
-                            ->label('Featured Image')
-                            ->image()
-                            ->directory('products')
-                            ->imageResizeMode('cover')
-                            ->imageCropAspectRatio('1:1')
-                            ->columnSpanFull(),
+                    FileUpload::make('images')
+                        ->label('Product Gallery Images')
+                        ->multiple()
+                        ->image()
+                        ->directory('products/gallery')
+                        ->reorderable()
+                        ->preserveFilenames()
+                        ->helperText('Upload multiple images for product gallery. First image will be primary.')
+                        ->columnSpanFull(),
 
-                        Toggle::make('status')
-                            ->label('Active')
-                            ->default(true),
-                    ]),
+                    Toggle::make('status')
+                        ->label('Active')
+                        ->default(true),
                 ]),
 
             Section::make('Product Variants')
@@ -552,8 +605,6 @@ class ProductList extends Component implements HasForms, HasTable
 
     protected function getEditFormSchema(Product $record): array
     {
-
-
         return [
             Section::make('Product Information')
                 ->schema([
@@ -582,19 +633,17 @@ class ProductList extends Component implements HasForms, HasTable
                         ->label('Description')
                         ->columnSpanFull(),
 
-                    Grid::make(2)->schema([
-                        FileUpload::make('featured_image')
-                            ->label('Featured Image')
-                            ->image()
-                            ->directory('products')
-                            ->imageResizeMode('cover')
-                            ->imageCropAspectRatio('1:1')
-                            ->columnSpanFull(),
+                    FileUpload::make('images')
+                        ->label('Product Gallery Images')
+                        ->multiple()
+                        ->image()
+                        ->directory('products/gallery')
+                        ->reorderable()
+                        ->helperText('Upload multiple images for product gallery. First image will be primary. Drag to reorder.')
+                        ->columnSpanFull(),
 
-                        Toggle::make('status')
-                            ->label('Active')
-                        ,
-                    ]),
+                    Toggle::make('status')
+                        ->label('Active'),
                 ]),
 
             Section::make('Product Variants')
@@ -649,14 +698,15 @@ class ProductList extends Component implements HasForms, HasTable
                     ->numeric()
                     ->minValue(0),
 
-                FileUpload::make('image')
+                FileUpload::make('variant_image')
                     ->label('Variant Image')
                     ->image()
                     ->directory('variants')
+                    ->helperText('Optional: Upload specific image for this variant')
                     ->nullable(),
 
                 Toggle::make('status')
-                    ->label('Active'),
+                    ->label('Active')->default(true),
             ])
         ];
     }
