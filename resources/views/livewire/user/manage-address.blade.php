@@ -4,13 +4,12 @@
     <h1 class="text-2xl font-semibold text-gray-800 mb-6">Manage Addresses</h1>
 
     <!-- Add New Address -->
-    <div
+    <div wire:click="$dispatch('openAddressModal')"
         class="bg-white border border-gray-200 rounded-lg px-5 py-4 mb-6 flex items-center gap-3 cursor-pointer hover:bg-gray-50 transition">
         <span class="text-blue-600 text-xl font-bold">+</span>
         <span class="text-blue-600 font-medium">ADD A NEW ADDRESS</span>
     </div>
 
-    <!-- Address List -->
     <div class="space-y-4">
 
         <!-- Address Card 1 -->
@@ -105,4 +104,5 @@
         </div>
 
     </div>
+    <livewire:address-modal />
 </div>
