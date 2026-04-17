@@ -5,6 +5,7 @@ namespace App\Livewire\Admin\Product;
 use App\Models\Product;
 use App\Models\Category;
 use App\Models\ProductVariant;
+use App\Models\ProductImage;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Tables\Columns\IconColumn;
@@ -39,25 +40,148 @@ use Filament\Tables\Actions\ActionGroup;
 class ProductList extends Component implements HasForms, HasTable
 {
     use InteractsWithForms;
-    use InteractsWithTable; 
+    use InteractsWithTable;
+
+    /**
+     * Generate a unique SKU for product variants
+     */
+    protected function generateUniqueSku($productId = null, $flavor = null): string
+    {
+        $base = 'SKU';
+        
+        if ($productId) {
+            $base .= '-' . $productId;
+        }
+        
+        if ($flavor && !empty(trim($flavor))) {
+            $flavorCode = strtoupper(substr(preg_replace('/[^A-Za-z0-9]/', '', $flavor), 0, 5));
+            if (!empty($flavorCode)) {
+                $base .= '-' . $flavorCode;
+            }
+        }
+        
+        $timestamp = time();
+        $random = strtoupper(Str::random(4));
+        $sku = $base . '-' . $timestamp . '-' . $random;
+        
+        $counter = 1;
+        while (ProductVariant::where('sku', $sku)->exists()) {
+            $sku = $base . '-' . $timestamp . '-' . $random . '-' . $counter;
+            $counter++;
+        }
+        
+        return $sku;
+    }
+
+    /**
+     * Handle variant creation with unique SKU generation
+     */
+    protected function createVariantWithUniqueSku($product, array $variantData)
+    {
+        $variantImage = $variantData['variant_image'] ?? null;
+        unset($variantData['variant_image']);
+        
+        if (empty($variantData['sku'])) {
+            $flavor = $variantData['flavor'] ?? null;
+            $variantData['sku'] = $this->generateUniqueSku($product->id, $flavor);
+        } else {
+            $existingSku = ProductVariant::where('sku', $variantData['sku'])->exists();
+            if ($existingSku) {
+                $flavor = $variantData['flavor'] ?? null;
+                $variantData['sku'] = $this->generateUniqueSku($product->id, $flavor);
+            }
+        }
+        
+        if ($variantImage) {
+            $imagePath = is_array($variantImage) ? ($variantImage['path'] ?? null) : $variantImage;
+            if ($imagePath) {
+                $variantData['image'] = $imagePath;
+            }
+        }
+        
+        unset($variantData['id']);
+        
+        $maxRetries = 3;
+        for ($attempt = 1; $attempt <= $maxRetries; $attempt++) {
+            try {
+                $variant = $product->variants()->create($variantData);
+                
+                // Save variant image to product_images table if exists
+                if ($variantImage && isset($imagePath)) {
+                    ProductImage::create([
+                        'product_id' => $product->id,
+                        'variant_id' => $variant->id,
+                        'image_url' => $imagePath,
+                        'is_primary' => false,
+                    ]);
+                }
+                
+                return $variant;
+            } catch (\Illuminate\Database\QueryException $e) {
+                if ($e->errorInfo[1] == 1062 && $attempt < $maxRetries) {
+                    $flavor = $variantData['flavor'] ?? null;
+                    $variantData['sku'] = $this->generateUniqueSku($product->id, $flavor);
+                    continue;
+                }
+                throw $e;
+            }
+        }
+        
+        throw new \Exception('Failed to create variant after ' . $maxRetries . ' attempts');
+    }
+
+    /**
+     * Handle variant update with unique SKU check
+     */
+    protected function updateVariantWithUniqueSku($variant, array $variantData, $productId = null)
+    {
+        $variantImage = $variantData['variant_image'] ?? null;
+        unset($variantData['variant_image']);
+        
+        if (isset($variantData['sku']) && $variantData['sku'] !== $variant->sku) {
+            $existingSku = ProductVariant::where('sku', $variantData['sku'])
+                ->where('id', '!=', $variant->id)
+                ->exists();
+            
+            if ($existingSku) {
+                $flavor = $variantData['flavor'] ?? $variant->flavor;
+                $variantData['sku'] = $this->generateUniqueSku($variant->product_id, $flavor);
+            }
+        }
+        
+        if ($variantImage) {
+            $imagePath = is_array($variantImage) ? ($variantImage['path'] ?? null) : $variantImage;
+            if ($imagePath) {
+                $variantData['image'] = $imagePath;
+                
+                // Update or create variant image in product_images table
+                ProductImage::updateOrCreate(
+                    ['variant_id' => $variant->id, 'product_id' => $productId ?? $variant->product_id],
+                    [
+                        'image_url' => $imagePath,
+                        'is_primary' => false,
+                    ]
+                );
+            }
+        }
+        
+        $variant->update($variantData);
+        return $variant;
+    }
 
     public function table(Table $table): Table
     {
         return $table
             ->query(Product::with('variants', 'category', 'images'))
             ->columns([
-
                 ImageColumn::make('primary_image')
                     ->label('Image')
                     ->getStateUsing(function ($record) {
-
-                        // 1. Variant image (priority)
                         $variant = $record->variants->first();
                         if ($variant && $variant->image) {
                             return asset('storage/' . $variant->image);
                         }
 
-                        // 2. Product primary image
                         $image = optional(
                             $record->images->where('is_primary', true)->first()
                         )->image_url;
@@ -163,7 +287,7 @@ class ProductList extends Component implements HasForms, HasTable
                         ->icon('heroicon-o-eye')
                         ->modalHeading('Product Details')
                         ->modalContent(function (Product $record): HtmlString {
-                            $product = Product::with('variants', 'category')->findOrFail($record->id);
+                            $product = Product::with('variants', 'category', 'images')->findOrFail($record->id);
                             return $this->getViewContent($product);
                         })
                         ->modalWidth('7xl'),
@@ -176,7 +300,7 @@ class ProductList extends Component implements HasForms, HasTable
                                 'slug' => $record->slug,
                                 'description' => $record->description,
                                 'status' => $record->status,
-                                'images' => $record->images->pluck('image_url')->toArray(),
+                                'images' => $record->images->whereNull('variant_id')->pluck('image_url')->toArray(),
                                 'variants' => $record->variants->map(function ($variant) {
                                     return [
                                         'id' => $variant->id,
@@ -188,7 +312,7 @@ class ProductList extends Component implements HasForms, HasTable
                                         'mrp' => $variant->mrp,
                                         'sale_price' => $variant->sale_price,
                                         'stock' => $variant->stock,
-                                        'variant_image' => $variant->image, // Renamed to avoid confusion
+                                        'variant_image' => $variant->image,
                                         'status' => $variant->status,
                                     ];
                                 })->toArray(),
@@ -199,6 +323,7 @@ class ProductList extends Component implements HasForms, HasTable
                         ->icon('heroicon-o-pencil')
                         ->form(fn(Product $record) => $this->getEditFormSchema($record))
                         ->action(function (Product $record, array $data): void {
+                            // Update product basic info
                             $record->update([
                                 'category_id' => $data['category_id'],
                                 'title' => $data['title'],
@@ -207,8 +332,11 @@ class ProductList extends Component implements HasForms, HasTable
                                 'status' => $data['status'],
                             ]);
 
-                            // Handle Product Images (Gallery)
+                            // Handle Product Gallery Images (variant_id = null)
+                            // Delete existing gallery images
                             $record->images()->whereNull('variant_id')->delete();
+                            
+                            // Save new gallery images
                             if (!empty($data['images'])) {
                                 $isFirst = true;
                                 foreach ($data['images'] as $img) {
@@ -217,51 +345,37 @@ class ProductList extends Component implements HasForms, HasTable
                                         $record->images()->create([
                                             'image_url' => $imagePath,
                                             'is_primary' => $isFirst,
-                                            'variant_id' => null, // Product level image
+                                            'variant_id' => null,
                                         ]);
                                         $isFirst = false;
                                     }
                                 }
                             }
 
-                            // Handle Variants with their own images
+                            // Handle Variants
                             if (isset($data['variants']) && is_array($data['variants'])) {
                                 $existingIds = $record->variants->pluck('id')->toArray();
                                 $updatedIds = [];
 
                                 foreach ($data['variants'] as $variantData) {
-                                    $variantImage = $variantData['variant_image'] ?? null;
-                                    unset($variantData['variant_image']);
-
-                                    if (!empty($variantData['id']) && in_array($variantData['id'], $existingIds)) {
-                                        $variant = ProductVariant::find($variantData['id']);
-                                        if ($variant) {
-                                            // Handle variant image
-                                            if ($variantImage) {
-                                                $imagePath = is_array($variantImage) ? ($variantImage['path'] ?? null) : $variantImage;
-                                                if ($imagePath) {
-                                                    $variantData['image'] = $imagePath;
-                                                }
-                                            }
-                                            $variant->update($variantData);
-                                            $updatedIds[] = $variantData['id'];
-                                        }
-                                    } else {
-                                        unset($variantData['id']);
-                                        // Handle variant image
-                                        if ($variantImage) {
-                                            $imagePath = is_array($variantImage) ? ($variantImage['path'] ?? null) : $variantImage;
-                                            if ($imagePath) {
-                                                $variantData['image'] = $imagePath;
-                                            }
-                                        }
-                                        $newVariant = $record->variants()->create($variantData);
+                                    // UPDATE existing variant
+                                    if (isset($variantData['id']) && $variant = ProductVariant::find($variantData['id'])) {
+                                        $this->updateVariantWithUniqueSku($variant, $variantData, $record->id);
+                                        $updatedIds[] = $variant->id;
+                                    }
+                                    // CREATE new variant
+                                    else {
+                                        $newVariant = $this->createVariantWithUniqueSku($record, $variantData);
                                         $updatedIds[] = $newVariant->id;
                                     }
                                 }
 
+                                // Delete removed variants and their images
                                 $toDelete = array_diff($existingIds, $updatedIds);
                                 if (!empty($toDelete)) {
+                                    // Delete variant images first
+                                    ProductImage::whereIn('variant_id', $toDelete)->delete();
+                                    // Then delete variants
                                     ProductVariant::whereIn('id', $toDelete)->delete();
                                 }
                             }
@@ -287,11 +401,11 @@ class ProductList extends Component implements HasForms, HasTable
                         ->requiresConfirmation()
                         ->modalDescription('This will also delete all associated variants and images.')
                         ->modalSubmitAction(fn($action) =>
-                            $action
-                                ->color(null)
-                                ->extraAttributes([
-                                    'class' => 'bg-red-600 text-white hover:bg-red-700'
-                                ])),
+                        $action
+                            ->color(null)
+                            ->extraAttributes([
+                                'class' => 'bg-red-600 text-white hover:bg-red-700'
+                            ])),
                 ])
             ])
             ->headerActions([
@@ -312,7 +426,7 @@ class ProductList extends Component implements HasForms, HasTable
                             'status' => $data['status'],
                         ]);
 
-                        // Save product gallery images
+                        // Save product gallery images (variant_id = null)
                         if (!empty($data['images'])) {
                             $isFirst = true;
                             foreach ($data['images'] as $img) {
@@ -328,21 +442,10 @@ class ProductList extends Component implements HasForms, HasTable
                             }
                         }
 
-                        // Save variants with their own images
+                        // Save variants
                         if (isset($data['variants']) && is_array($data['variants'])) {
                             foreach ($data['variants'] as $variantData) {
-                                $variantImage = $variantData['variant_image'] ?? null;
-                                unset($variantData['variant_image']);
-
-                                if ($variantImage) {
-                                    $imagePath = is_array($variantImage) ? ($variantImage['path'] ?? null) : $variantImage;
-                                    if ($imagePath) {
-                                        $variantData['image'] = $imagePath;
-                                    }
-                                }
-
-                                unset($variantData['id']);
-                                $product->variants()->create($variantData);
+                                $this->createVariantWithUniqueSku($product, $variantData);
                             }
                         }
 
@@ -379,7 +482,6 @@ class ProductList extends Component implements HasForms, HasTable
 
     protected function getViewContent(Product $product): HtmlString
     {
-        // Get product gallery images
         $productImages = $product->images->whereNull('variant_id');
         $primaryImage = optional($productImages->where('is_primary', true)->first())->image_url;
         $imageUrl = $this->getImageUrl($primaryImage);
@@ -448,10 +550,15 @@ class ProductList extends Component implements HasForms, HasTable
 
     protected function getImageUrl($path)
     {
-        if ($path && Storage::disk('public')->exists($path)) {
+        if (!$path) {
+            return 'https://ui-avatars.com/api/?background=0D8ABC&color=fff&name=Product';
+        }
+        
+        if (Storage::disk('public')->exists($path)) {
             return Storage::url($path);
         }
-        return 'https://ui-avatars.com/api/?background=0D8ABC&color=fff&name=Product';
+        
+        return asset('storage/' . $path);
     }
 
     protected function getStatusColor($status): string
@@ -487,7 +594,6 @@ class ProductList extends Component implements HasForms, HasTable
             $stockClass = $variant->stock <= 0 ? 'text-red-600' : ($variant->stock <= 10 ? 'text-yellow-600' : 'text-green-600');
             $stockText = $variant->stock <= 0 ? 'Out of Stock' : ($variant->stock <= 10 ? "{$variant->stock} left" : $variant->stock);
 
-            // Get variant image
             $variantImage = $variant->image ? '<img src="' . Storage::url($variant->image) . '" class="h-8 w-8 object-cover rounded">' : '-';
 
             $rows .= <<<HTML
@@ -667,16 +773,30 @@ class ProductList extends Component implements HasForms, HasTable
             Grid::make(3)->schema([
                 TextInput::make('id')->hidden(),
 
-                TextInput::make('sku')->label('SKU')->required()->maxLength(255),
-                TextInput::make('flavor')->label('Flavor')->maxLength(255),
-                TextInput::make('weight')->label('Weight')->numeric()->step(0.01),
+                TextInput::make('sku')
+                    ->label('SKU')
+                    ->required()
+                    ->maxLength(255)
+                    ->helperText('Leave empty to auto-generate a unique SKU')
+                    ->placeholder('Auto-generated if left empty'),
+                    
+                TextInput::make('flavor')
+                    ->label('Flavor')
+                    ->maxLength(255),
+                    
+                TextInput::make('weight')
+                    ->label('Weight')
+                    ->numeric()
+                    ->step(0.01),
 
                 Select::make('weight_unit')
                     ->label('Weight Unit')
                     ->options(['g' => 'Grams (g)', 'kg' => 'Kilograms (kg)', 'ml' => 'Milliliters (ml)', 'l' => 'Liters (l)'])
                     ->default('g'),
 
-                TextInput::make('pack_type')->label('Pack Type')->placeholder('e.g., Pouch, Jar'),
+                TextInput::make('pack_type')
+                    ->label('Pack Type')
+                    ->placeholder('e.g., Pouch, Jar'),
 
                 TextInput::make('mrp')
                     ->label('MRP')
@@ -706,7 +826,8 @@ class ProductList extends Component implements HasForms, HasTable
                     ->nullable(),
 
                 Toggle::make('status')
-                    ->label('Active')->default(true),
+                    ->label('Active')
+                    ->default(true),
             ])
         ];
     }
