@@ -9,6 +9,7 @@ use App\Livewire\Admin\Product\Productcreate;
 use App\Livewire\Admin\Product\ProductList;
 use App\Livewire\Admin\User\ManageUsers;
 use App\Livewire\Public\Home;
+use App\Livewire\Public\ProductDetails;
 use App\Livewire\User\ManageAddress;
 use App\Livewire\User\ManageOrders;
 use App\Livewire\User\Profile;
@@ -47,4 +48,7 @@ Route::middleware(['auth', 'isAdmin'])
         Route::get('/manage/users', ManageUsers::class)->name('manage.user');
         Route::get('/manage/order', ManageOrder::class)->name('manage.order');
     });
+
+     Route::get('/product/details/{slug}', ProductDetails::class)->name('view-products');
+
 require __DIR__ . '/auth.php';
