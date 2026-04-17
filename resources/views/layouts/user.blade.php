@@ -11,18 +11,19 @@
     @livewireStyles
 </head>
 
-<body>
+<body class="bg-gray-100">
     <div>
         <x-navbar />
     </div>
-    <div class="flex min-h-screen">
-        <aside class="w-64 bg-white shadow-md hidden md:block">
+    <div class="flex gap-2 w-full">
+        <div class="w-2/12 h-screen fixed shadow-md hidden md:block">
             <x-user-sidebar />
-        </aside>
+        </div>
+        <div class="w-10/12 h-screen ml-[17%]">
+            {{ $slot }}
+        </div>
     </div>
-    <main>
-        {{ $slot }}
-    </main>
+
 
     @livewireScripts
 </body>
