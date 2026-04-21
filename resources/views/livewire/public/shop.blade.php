@@ -1,7 +1,7 @@
 <div class="min-h-screen bg-gradient-to-b from-gray-50 to-white" x-data="{ loading: false }">
     <div wire:loading
-        class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center backdrop-blur-sm">
-        <div class="bg-white rounded-2xl p-8 flex flex-col items-center gap-4 shadow-2xl">
+        class="fixed inset-0 z-50 top-64 flex items-center justify-center">
+        <div class="p-8 flex flex-col items-center gap-4 ">
             <div class="relative w-16 h-16">
                 <div class="absolute inset-0 border-4 border-amber-200 rounded-full animate-spin border-t-amber-500"></div>
             </div>
