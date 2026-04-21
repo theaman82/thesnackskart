@@ -13,10 +13,10 @@
                 <!-- Card 1 - Roasted Makhana (Amber Theme) -->
                 @foreach($products as $product) 
             
-                <div
+                <div 
                     @class(['group', 'bg-white', 'rounded-xl', 'overflow-hidden', 'shadow-md', 'hover:shadow-xl', 'transition-all', 'duration-300', 'hover:-translate-y-1'])>
                     <div @class(['relative', 'overflow-hidden'])>
-                        <img src="/banner/1736159404-Cream-Onion.jpg" alt="Roasted Makhana"
+                        <img src="{{ asset('storage/'.($product->images->first()->image_url?? 'default.png')) }}" alt="Roasted Makhana"
                             @class(['w-full', 'object-cover', 'group-hover:scale-105', 'transition', 'duration-300'])>
                         <button
                             @class(['absolute', 'top-3', 'right-3', 'w-8', 'h-8', 'bg-white', 'rounded-full', 'flex', 'items-center', 'justify-center', 'shadow-md', 'hover:bg-red-50', 'transition'])>
