@@ -142,116 +142,26 @@
             </h2>
 
             <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-4 md:gap-6">
-
-                <!-- 1. Roasted Makhana -->
-                <a href="/shop?category=roasted-makhana"
-                    class="group block bg-white rounded-xl overflow-hidden border border-gray-200 hover:border-amber-300 ">
-                    <div class="aspect-square bg-amber-50/40 flex items-center justify-center">
-                        <img src="/banner/product-1.png" alt="Roasted Makhana"
-                            class="w-full h-full object-contain group-hover:scale-110 transition-transform duration-300">
-                    </div>
-                    <div class="p-4 text-center">
-                        <h3
-                            class="text-base md:text-lg font-medium text-gray-800 group-hover:text-amber-700 transition-colors">
-                            Roasted Makhana
-                        </h3>
-                    </div>
-                </a>
-
-                <!-- 2. Fresh Vegetables -->
-                <a href="/shop?category=fresh-vegetables"
-                    class="group block bg-white rounded-xl overflow-hidden border border-gray-200 hover:border-amber-300 hover:shadow-md transition-all duration-200 hover:-translate-y-1">
-                    <div class="aspect-square bg-amber-50/40 flex items-center justify-center ">
-                        <img src="/banner/product-2.png" alt="Fresh Vegetables"
-                            class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300">
-                    </div>
-                    <div class="p-4 text-center">
-                        <h3
-                            class="text-base md:text-lg font-medium text-gray-800 group-hover:text-amber-700 transition-colors">
-                            Fresh Vegetables
-                        </h3>
-                    </div>
-                </a>
-
-                <!-- 3. Seasonal Fruits -->
-                <a href="/shop?category=seasonal-fruits"
-                    class="group block bg-white rounded-xl overflow-hidden border border-gray-200 hover:border-amber-300 hover:shadow-md transition-all duration-200 hover:-translate-y-1">
-                    <div class="aspect-square bg-amber-50/40 flex items-center justify-center ">
-                        <img src="/banner/product-3.png" alt="Seasonal Fruits"
-                            class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300">
-                    </div>
-                    <div class="p-4 text-center">
-                        <h3
-                            class="text-base md:text-lg font-medium text-gray-800 group-hover:text-amber-700 transition-colors">
-                            Seasonal Fruits
-                        </h3>
-                    </div>
-                </a>
-
-                <!-- 4. Nuts & Dry Fruits -->
-                <a href="/shop?category=nuts-dry-fruits"
-                    class="group block bg-white rounded-xl overflow-hidden border border-gray-200 hover:border-amber-300 hover:shadow-md transition-all duration-200 hover:-translate-y-1">
-                    <div class="aspect-square bg-amber-50/40 flex items-center justify-center ">
-                        <img src="/banner/product-4.png" alt="Nuts & Dry Fruits"
-                            class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300">
-                    </div>
-                    <div class="p-4 text-center">
-                        <h3
-                            class="text-base md:text-lg font-medium text-gray-800 group-hover:text-amber-700 transition-colors">
-                            Nuts & Dry Fruits
-                        </h3>
-                    </div>
-                </a>
-
-                <!-- 5. Grains & Millets -->
-                <a href="/shop?category=grains-millets"
-                    class="group block bg-white rounded-xl overflow-hidden border border-gray-200 hover:border-amber-300 hover:shadow-md transition-all duration-200 hover:-translate-y-1">
-                    <div class="aspect-square bg-amber-50/40 flex items-center justify-center ">
-                        <img src="/banner/product-5.png" alt="Grains & Millets"
-                            class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300">
-                    </div>
-                    <div class="p-4 text-center">
-                        <h3
-                            class="text-base md:text-lg font-medium text-gray-800 group-hover:text-amber-700 transition-colors">
-                            Grains & Millets
-                        </h3>
-                    </div>
-                </a>
-
-                <!-- 6. Pulses & Lentils -->
-                <a href="/shop?category=pulses-lentils"
-                    class="group block bg-white rounded-xl overflow-hidden border border-gray-200 hover:border-amber-300 hover:shadow-md transition-all duration-200 hover:-translate-y-1">
-                    <div class="aspect-square bg-amber-50/40 flex items-center justify-center ">
-                        <img src="/banner/product-6.png" alt="Pulses & Lentils"
-                            class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300">
-                    </div>
-                    <div class="p-4 text-center">
-                        <h3
-                            class="text-base md:text-lg font-medium text-gray-800 group-hover:text-amber-700 transition-colors">
-                            Pulses & Lentils
-                        </h3>
-                    </div>
-                </a>
-
-                <!-- 7. Spices & Herbs -->
-                <a href="/shop?category=spices-herbs"
-                    class="group block bg-white rounded-xl overflow-hidden border border-gray-200 hover:border-amber-300 hover:shadow-md transition-all duration-200 hover:-translate-y-1">
-                    <div class="aspect-square bg-amber-50/40 flex items-center justify-center ">
-                        <img src="/banner/product-2.png" alt="Spices & Herbs"
-                            class="w-full h-full  object-contain group-hover:scale-105 transition-transform duration-300">
-                    </div>
-                    <div class="p-4 text-center">
-                        <h3
-                            class="text-base md:text-lg font-medium text-gray-800 group-hover:text-amber-700 transition-colors">
-                            Spices & Herbs
-                        </h3>
-                    </div>
-                </a>
-
+                @foreach($categories as $category)
+                    <!-- 1. Roasted Makhana -->
+                     <a href="{{ route('shop', ['category' => $category->id]) }}"
+                        class="group block bg-white rounded-xl overflow-hidden border border-gray-200 hover:border-amber-300 ">
+                        <div class="aspect-square bg-amber-50/40 flex items-center justify-center">
+                            <img src="/banner/product-1.png" alt="Roasted Makhana"
+                                class="w-full h-full object-contain group-hover:scale-110 transition-transform duration-300">
+                        </div>
+                        <div class="p-4 text-center">
+                            <h3
+                                class="text-base md:text-lg font-medium text-gray-800 group-hover:text-amber-700 transition-colors">
+                                {{ $category->title }}
+                            </h3>
+                        </div>
+                    </a>
+                @endforeach
             </div>
 
             <div class="text-center mt-10 md:mt-14">
-                <a href="/shop"
+                <a href="{{ route('shop') }}"
                     class="inline-block px-8 py-3 bg-amber-600 text-white font-medium rounded-lg hover:bg-amber-700 transition">
                     View All Products →
                 </a>
@@ -497,8 +407,6 @@
             </div>
         </div>
     </section>
-
-
     <!-- Footer -->
     <footer class="bg-stone-900 text-stone-300 pt-16 pb-8 px-4">
         <div class="max-w-7xl mx-auto">

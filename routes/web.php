@@ -11,6 +11,7 @@ use App\Livewire\Admin\User\ManageUsers;
 use App\Livewire\Public\Cart;
 use App\Livewire\Public\Home;
 use App\Livewire\Public\ProductDetails;
+use App\Livewire\Public\Shop;
 use App\Livewire\User\ManageAddress;
 use App\Livewire\User\ManageOrders;
 use App\Livewire\User\Profile;
@@ -31,6 +32,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 Route::get('/cart', Cart::class)->name('cart.page');
+Route::get('/shop', Shop::class)->name('shop');
 
 Route::middleware(['auth', 'isAdmin'])
     ->prefix('admin')
