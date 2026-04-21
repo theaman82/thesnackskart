@@ -301,14 +301,10 @@
                             </div>
                             <span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">25% off</span>
                         </div>
-                        <button
+                        <button wire:click="addToCart(1)"
                             class="w-full cursor-pointer mt-4 bg-amber-500 text-white py-2 rounded-lg hover:bg-amber-600 transition flex items-center justify-center gap-2">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z">
-                                </path>
-                            </svg>
-                            Add to Cart
+
+                            🛒 Add to Cart
                         </button>
                     </div>
                 </div>
@@ -344,7 +340,7 @@
                             </div>
                             <span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded">25% off</span>
                         </div>
-                        <button
+                        <button wire:click="addToCart(2)"
                             class="w-full cursor-pointer mt-4 bg-amber-500 text-white py-2 rounded-lg hover:bg-amber-600 transition flex items-center justify-center gap-2">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -441,8 +437,6 @@
                         </button>
                     </div>
                 </div>
-
-                <!-- Card 5 - Sweet Makhana (Pink Theme) -->
 
             </div>
 
@@ -695,7 +689,7 @@
     </section>
 
 
-
+<livewire:cart-sidebar/>
     <!-- Footer -->
     <footer class="bg-stone-900 text-stone-300 pt-16 pb-8 px-4">
         <div class="max-w-7xl mx-auto">
