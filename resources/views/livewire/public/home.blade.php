@@ -259,7 +259,7 @@
         </div>
     </section>
     <!-- Featured Products Section -->
-    <livewire:public.product/>
+    <livewire:public.product />
     <!-- Why Choose Us Section -->
     <section class="py-20 px-4 bg-gradient-to-b from-amber-50/80 to-white">
         <div class="max-w-7xl mx-auto">
@@ -499,7 +499,6 @@
     </section>
 
 
-<livewire:cart-sidebar/>
     <!-- Footer -->
     <footer class="bg-stone-900 text-stone-300 pt-16 pb-8 px-4">
         <div class="max-w-7xl mx-auto">
