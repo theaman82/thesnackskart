@@ -499,7 +499,7 @@
     </section>
 
 
-
+<livewire:cart-sidebar/>
     <!-- Footer -->
     <footer class="bg-stone-900 text-stone-300 pt-16 pb-8 px-4">
         <div class="max-w-7xl mx-auto">
