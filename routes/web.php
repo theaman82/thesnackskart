@@ -8,6 +8,7 @@ use App\Livewire\Admin\Order\ManageOrder;
 use App\Livewire\Admin\Product\Productcreate;
 use App\Livewire\Admin\Product\ProductList;
 use App\Livewire\Admin\User\ManageUsers;
+use App\Livewire\Public\Cart;
 use App\Livewire\Public\Home;
 use App\Livewire\Public\ProductDetails;
 use App\Livewire\User\ManageAddress;
@@ -29,6 +30,7 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
+Route::get('/cart', Cart::class)->name('cart.page');
 
 Route::middleware(['auth', 'isAdmin'])
     ->prefix('admin')
@@ -41,14 +43,14 @@ Route::middleware(['auth', 'isAdmin'])
 
         Route::get('/category/list', CategoryList::class)
             ->name('category.list');
-        Route::get('/product/insert',Productcreate::class)
-        ->name('product.create');
-        Route::get('/product/list',ProductList::class)
-        ->name('product.list');
+        Route::get('/product/insert', Productcreate::class)
+            ->name('product.create');
+        Route::get('/product/list', ProductList::class)
+            ->name('product.list');
         Route::get('/manage/users', ManageUsers::class)->name('manage.user');
         Route::get('/manage/order', ManageOrder::class)->name('manage.order');
     });
 
-     Route::get('/product/details/{slug}', ProductDetails::class)->name('view-products');
+Route::get('/product/details/{slug}', ProductDetails::class)->name('view-products');
 
 require __DIR__ . '/auth.php';
