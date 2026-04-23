@@ -20,19 +20,21 @@ class ImageKitService
     /**
      * Upload Image
      */
-    public function upload($file, $folder = 'products')
-    {
-        $fileName = time() . '_' . $file->getClientOriginalName();
+   public function upload($file, $folder = 'products')
+{
+    $fileName = time() . '_' . $file->getClientOriginalName();
 
-        $response = $this->imageKit->upload([
-            'file' => fopen($file->getRealPath(), 'r'),
-            'fileName' => $fileName,
-            'folder' => $folder,
-        ]);
+    $response = $this->imageKit->upload([
+        'file' => fopen($file->getRealPath(), 'r'),
+        'fileName' => $fileName,
+        'folder' => $folder,
+    ]);
 
-        return $response->result->url;
-    }
-
+    return [
+        'url' => $response->result->url,
+        'file_id' => $response->result->fileId,
+    ];
+}
     /**
      * Delete Image
      */
