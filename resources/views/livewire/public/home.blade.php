@@ -134,40 +134,132 @@
         </div>
     </section>
 
-    <!-- Categories Section -->
-    <section class="py-12 md:py-16 bg-white">
-        <div class="w-full mx-auto  px-4 sm:px-6 lg:px-12">
-            <h2 class="text-2xl md:text-4xl font-bold text-center text-gray-800 mb-10 md:mb-14">
-                Shop by Category
+<!-- Categories Section with Scroll Buttons & Refined Design -->
+<section class="py-12 md:py-16 bg-gray-50">
+    <div class="w-full mx-auto px-4 sm:px-6 lg:px-12">
+        <!-- Section Header -->
+        <div class="text-center mb-10 md:mb-14">
+            <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-3">
+                Shop by <span class="text-amber-600">Category</span>
             </h2>
+            <div class="w-20 h-1 bg-amber-500 rounded-full mx-auto"></div>
+            <p class="text-gray-500 mt-3 max-w-md mx-auto">Explore our finest collection</p>
+        </div>
 
-            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-4 md:gap-6">
-                @foreach($categories as $category)
-                    <!-- 1. Roasted Makhana -->
-                     <a href="{{ route('shop', ['category' => $category->id]) }}"
-                        class="group block bg-white rounded-xl overflow-hidden border border-gray-200 hover:border-amber-300 ">
-                        <div class="aspect-square bg-amber-50/40 flex items-center justify-center">
-                            <img src="/banner/product-1.png" alt="Roasted Makhana"
-                                class="w-full h-full object-contain group-hover:scale-110 transition-transform duration-300">
-                        </div>
-                        <div class="p-4 text-center">
-                            <h3
-                                class="text-base md:text-lg font-medium text-gray-800 group-hover:text-amber-700 transition-colors">
-                                {{ $category->title }}
-                            </h3>
-                        </div>
-                    </a>
-                @endforeach
-            </div>
+        <!-- Scrollable Container with Navigation Buttons -->
+        <div class="relative">
+            <!-- Left Button -->
+            <button id="catScrollLeft"
+                class="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white rounded-full p-2 shadow-lg border border-gray-200 hover:bg-amber-50 hover:border-amber-300 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-amber-400 disabled:opacity-40 disabled:cursor-not-allowed"
+                aria-label="Scroll left">
+                <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
+                </svg>
+            </button>
 
-            <div class="text-center mt-10 md:mt-14">
-                <a href="{{ route('shop') }}"
-                    class="inline-block px-8 py-3 bg-amber-600 text-white font-medium rounded-lg hover:bg-amber-700 transition">
-                    View All Products →
-                </a>
+            <!-- Right Button -->
+            <button id="catScrollRight"
+                class="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white rounded-full p-2 shadow-lg border border-gray-200 hover:bg-amber-50 hover:border-amber-300 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-amber-400 disabled:opacity-40 disabled:cursor-not-allowed"
+                aria-label="Scroll right">
+                <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
+                </svg>
+            </button>
+
+            <!-- Scroll Wrapper - No visible scrollbar -->
+            <div id="catScrollContainer"
+                class="overflow-x-auto scroll-smooth pb-6 -mx-2 px-2"
+                style="scrollbar-width: none; -ms-overflow-style: none;">
+                
+                <!-- Hide scrollbar for Chrome/Safari -->
+                <style>
+                    #catScrollContainer::-webkit-scrollbar {
+                        display: none;
+                    }
+                </style>
+
+                <!-- Category Cards Grid - Horizontal Flex -->
+                <div class="flex gap-5 md:gap-6">
+                    @foreach($categories as $category)
+                        <a href="{{ route('shop', ['category' => $category->id]) }}"
+                            class="group flex-shrink-0 w-[150px] sm:w-[170px] md:w-[200px] bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl border border-gray-100 hover:border-amber-200 transition-all duration-300 hover:-translate-y-1">
+                            
+                            <!-- Image Container - Consistent aspect ratio -->
+                            <div class="relative bg-gradient-to-br from-amber-50 to-white p-4 flex items-center justify-center h-36 sm:h-44 md:h-52">
+                                <img src="/banner/product-1.png" alt="{{ $category->title }}"
+                                    class="w-full h-full object-contain transition-transform duration-300 group-hover:scale-110">
+                            </div>
+                            
+                            <!-- Category Name -->
+                            <div class="p-3 md:p-4 text-center border-t border-gray-50 bg-white">
+                                <h3 class="text-sm sm:text-base font-semibold text-gray-800 group-hover:text-amber-600 transition-colors truncate">
+                                    {{ $category->title }}
+                                </h3>
+                                <!-- Optional: Add subtle icon or count -->
+                                <div class="text-xs text-gray-400 mt-1 group-hover:text-amber-500 transition-colors">
+                                    Shop Now →
+                                </div>
+                            </div>
+                        </a>
+                    @endforeach
+                </div>
             </div>
         </div>
-    </section>
+
+        <!-- View All Button -->
+        <div class="text-center mt-10 md:mt-12">
+            <a href="{{ route('shop') }}"
+                class="inline-flex items-center gap-2 px-6 py-2.5 bg-transparent border-2 border-amber-500 text-amber-600 font-semibold rounded-full hover:bg-amber-500 hover:text-white transition-all duration-200">
+                Browse All Categories
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                </svg>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Simple JavaScript for Scroll Functionality -->
+<script>
+    (function() {
+        const container = document.getElementById('catScrollContainer');
+        const leftBtn = document.getElementById('catScrollLeft');
+        const rightBtn = document.getElementById('catScrollRight');
+
+        if (!container || !leftBtn || !rightBtn) return;
+
+        function updateButtons() {
+            const scrollLeft = container.scrollLeft;
+            const maxScroll = container.scrollWidth - container.clientWidth;
+            leftBtn.disabled = scrollLeft <= 5;
+            rightBtn.disabled = maxScroll - scrollLeft <= 5;
+        }
+
+        function scroll(direction) {
+            const scrollAmount = container.clientWidth * 0.7;
+            container.scrollBy({
+                left: direction === 'left' ? -scrollAmount : scrollAmount,
+                behavior: 'smooth'
+            });
+        }
+
+        leftBtn.onclick = () => scroll('left');
+        rightBtn.onclick = () => scroll('right');
+        container.addEventListener('scroll', updateButtons);
+        window.addEventListener('resize', updateButtons);
+        
+        // Initial update
+        setTimeout(updateButtons, 50);
+        
+        // Optional: Mouse wheel horizontal scroll
+        container.addEventListener('wheel', (e) => {
+            if (e.deltaY !== 0) {
+                e.preventDefault();
+                container.scrollBy({ left: e.deltaY > 0 ? 80 : -80, behavior: 'smooth' });
+            }
+        });
+    })();
+</script>
     <!-- Featured Products Section -->
     <livewire:public.product />
     <!-- Why Choose Us Section -->
