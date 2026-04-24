@@ -20,12 +20,19 @@ class ImageKitService
     /**
      * Upload Image
      */
-   public function upload($file, $folder = 'products')
+public function upload($file, $folder = 'products')
 {
-    $fileName = time() . '_' . $file->getClientOriginalName();
+    // ✅ Handle both string & file object
+    if (is_string($file)) {
+        $filePath = storage_path('app/public/' . $file);
+        $fileName = time() . '_' . basename($file);
+    } else {
+        $filePath = $file->getRealPath();
+        $fileName = time() . '_' . $file->getClientOriginalName();
+    }
 
     $response = $this->imageKit->upload([
-        'file' => fopen($file->getRealPath(), 'r'),
+        'file' => base64_encode(file_get_contents($filePath)),
         'fileName' => $fileName,
         'folder' => $folder,
     ]);
