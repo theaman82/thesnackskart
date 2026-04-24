@@ -20,6 +20,10 @@ use Filament\Notifications\Notification;
 use Livewire\Component;
 use Filament\Tables\Actions\CreateAction;
 use Filament\Tables\Actions\ActionGroup;
+use App\Services\ImageKitService;
+use Filament\Forms\Components\FileUpload;
+use Filament\Tables\Columns\ImageColumn;
+
 class CategoryList extends Component implements HasForms, HasActions, HasTable
 {
     use InteractsWithForms;
@@ -34,6 +38,9 @@ class CategoryList extends Component implements HasForms, HasActions, HasTable
                 TextColumn::make('id')
                     ->sortable()
                     ->searchable(),
+                ImageColumn::make('image')
+                    ->label('Image')
+                    ->circular(),
 
                 TextColumn::make('title')
                     ->searchable()
@@ -47,6 +54,7 @@ class CategoryList extends Component implements HasForms, HasActions, HasTable
                 TextColumn::make('created_at')
                     ->dateTime('d-m-Y')
                     ->sortable(),
+
             ])
             ->headerActions([
                 CreateAction::make()
@@ -54,7 +62,7 @@ class CategoryList extends Component implements HasForms, HasActions, HasTable
                     ->icon('heroicon-o-plus')
                     ->color('success')
                     ->extraAttributes([
-                                                'class' => 'bg-blue-600 text-white hover:bg-blue-700'
+                        'class' => 'bg-blue-600 text-white hover:bg-blue-700'
 
                     ])
                     ->createAnother(false)
@@ -85,14 +93,28 @@ class CategoryList extends Component implements HasForms, HasActions, HasTable
                             ->rows(4)
                             ->extraAttributes(['class' => 'rounded-xl'])
                             ->columnSpanFull(),
+                        FileUpload::make('image') // 👈 ADD THIS
+                            ->label('Category Image')
+                            ->image()
+                            ->required()
+                            ->columnSpanFull(),
                     ])
                     ->using(function (array $data): Category {
+
+                        $imageKit = app(ImageKitService::class);
+
+                        if (isset($data['image'])) {
+                            $imageData = $imageKit->upload($data['image'], 'categories');
+
+                            $data['image'] = $imageData['url'];
+                            $data['image_file_id'] = $imageData['file_id'];
+                        }
+
                         $category = Category::create($data);
 
                         Notification::make()
                             ->title('✅ Category created successfully!')
                             ->success()
-                            ->duration(2000)
                             ->send();
 
                         return $category;
@@ -101,70 +123,92 @@ class CategoryList extends Component implements HasForms, HasActions, HasTable
             ])
             ->actions([
                 ActionGroup::make([
-                EditAction::make()
-                    ->label('Edit')
-                    ->icon('heroicon-o-pencil-square')
-                    ->color('warning')
-                    ->modalHeading('Edit Category')
-                    ->modalSubheading('Update category details below')
-                    ->modalWidth('sm')
-                    ->modalSubmitActionLabel('Update Category')
-                    ->modalCancelActionLabel('Cancel')
-                    ->modalFooterActionsAlignment('end')
-                    ->form([
-                        TextInput::make('title')
-                            ->required()
-                            ->maxLength(255)
-                            ->label('Category Title')
-                            ->placeholder('Enter category name...')
-                            ->extraAttributes(['class' => 'rounded-xl'])
-                            ->columnSpan(1),
+                    EditAction::make()
+                        ->label('Edit')
+                        ->icon('heroicon-o-pencil-square')
+                        ->color('warning')
+                        ->modalHeading('Edit Category')
+                        ->modalSubheading('Update category details below')
+                        ->modalWidth('sm')
+                        ->modalSubmitActionLabel('Update Category')
+                        ->modalCancelActionLabel('Cancel')
+                        ->modalFooterActionsAlignment('end')
+                        ->form([
+                            TextInput::make('title')
+                                ->required()
+                                ->maxLength(255)
+                                ->label('Category Title')
+                                ->placeholder('Enter category name...')
+                                ->extraAttributes(['class' => 'rounded-xl'])
+                                ->columnSpan(1),
 
-                        Select::make('parent_id')
-                            ->label('Parent Category')
-                            ->relationship('parent', 'title')
-                            ->preload()
-                            ->placeholder('Select Parent Category')
-                            ->columnSpan(1),
+                            Select::make('parent_id')
+                                ->label('Parent Category')
+                                ->relationship('parent', 'title')
+                                ->preload()
+                                ->placeholder('Select Parent Category')
+                                ->columnSpan(1),
 
-                        Textarea::make('description')
-                            ->label('Description')
-                            ->placeholder('Write something about this category...')
-                            ->rows(4)
-                            ->helperText('Optional but recommended')
-                            ->extraAttributes(['class' => 'rounded-xl'])
-                            ->columnSpanFull(),
-                    ])
-                    ->using(function (Category $record, array $data): Category {
-                        $record->update($data);
+                            Textarea::make('description')
+                                ->label('Description')
+                                ->placeholder('Write something about this category...')
+                                ->rows(4)
+                                ->helperText('Optional but recommended')
+                                ->extraAttributes(['class' => 'rounded-xl'])
+                                ->columnSpanFull(),
+                            FileUpload::make('image') // 👈 ADD THIS
+                                ->label('Category Image')
+                                ->image()
+                                ->columnSpanFull(),
+                        ])
+                        ->using(function (Category $record, array $data): Category {
 
-                        Notification::make()
-                            ->title('✅ Category updated successfully!')
-                            ->success()
-                            ->duration(2000)
-                            ->send();
+                            $imageKit = app(ImageKitService::class);
 
-                        return $record;
-                    }),
+                            if (!empty($data['image'])) {
 
-                DeleteAction::make()
-                    ->label('Delete')
-                    ->icon('heroicon-o-trash')
-                    ->color('danger')
-                    ->requiresConfirmation()
-                    ->modalHeading('Delete Category')
-                    ->modalDescription('Are you sure you want to delete this category? This action cannot be undone.')
-                    ->using(function (Category $record): bool {
-                        $record->delete();
+                                if ($record->image_file_id) {
+                                    $imageKit->delete($record->image_file_id);
+                                }
 
-                        Notification::make()
-                            ->title('Category deleted successfully!')
-                            ->success()
-                            ->send();
+                                $imageData = $imageKit->upload($data['image'], 'categories');
 
-                        return true;
-                    }),
-            ])
+                                $data['image'] = $imageData['url'];
+                                $data['image_file_id'] = $imageData['file_id'];
+                            } else {
+                                unset($data['image']); // 🔥 prevent overwrite
+                            }
+
+                            $record->update($data);
+
+                            return $record;
+                        }),
+
+                    DeleteAction::make()
+                        ->label('Delete')
+                        ->icon('heroicon-o-trash')
+                        ->color('danger')
+                        ->requiresConfirmation()
+                        ->modalHeading('Delete Category')
+                        ->modalDescription('Are you sure you want to delete this category? This action cannot be undone.')
+                        ->using(function (Category $record): bool {
+
+                            $imageKit = app(ImageKitService::class);
+
+                            if ($record->image_file_id) {
+                                $imageKit->delete($record->image_file_id);
+                            }
+
+                            $record->delete();
+
+                            Notification::make()
+                                ->title('Category deleted successfully!')
+                                ->success()
+                                ->send();
+
+                            return true;
+                        }),
+                ])
             ])
             ->bulkActions([
                 \Filament\Tables\Actions\BulkActionGroup::make([

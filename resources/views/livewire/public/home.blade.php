@@ -186,7 +186,7 @@
                             
                             <!-- Image Container - Consistent aspect ratio -->
                             <div class="relative bg-gradient-to-br from-amber-50 to-white p-4 flex items-center justify-center h-36 sm:h-44 md:h-52">
-                                <img src="/banner/product-1.png" alt="{{ $category->title }}"
+                                <img src="{{ $category->image ?? asset('images/default.png') }}"
                                     class="w-full h-full object-contain transition-transform duration-300 group-hover:scale-110">
                             </div>
                             
